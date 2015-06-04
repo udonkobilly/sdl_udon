@@ -6,7 +6,8 @@ when /i386-mingw32/
   dir_config('sdl')
   libs = %w[mingw32 SDL2main SDL2 SDL2_image SDL2_ttf SDL2_mixer shell32 ws2_32 iphlpapi imagehlp shlwapi]
   libs.each { |i| raise "NotFound [#{i}]..." unless have_library(i) }
-  system("gcc -MM *c > depend") unless File.exist?('depend')
+
+  # system("gcc -MM *.c > depend") unless File.exist?('depend')
   optflags = '-mwindows -mconsole -fno-omit-frame-pointer -fno-fast-math'
   # debugflags = -g -O0 -m32
   releaseflags = '-s -O2 -m32'
