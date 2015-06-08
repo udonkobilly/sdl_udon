@@ -120,6 +120,33 @@
       <li class="public ">
   <span class="summary_signature">
     
+      <a href="#position-instance_method" title="#position= (instance method)">- (Music) <strong>position=</strong>(value) </a>
+    
+
+    
+  </span>
+  
+  
+  
+    
+    
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'>
+<p>再生位置の設定.</p>
+</div></span>
+  
+</li>
+
+    
+      <li class="public ">
+  <span class="summary_signature">
+    
       <a href="#volume-instance_method" title="#volume (instance method)">- (Float) <strong>volume</strong> </a>
     
 
@@ -429,9 +456,114 @@
     <h2>Instance Attribute Details</h2>
     
       
-      <span id="volume=-instance_method"></span>
+      <span id="position=-instance_method"></span>
       <div class="method_details first">
-  <h3 class="signature first" id="volume-instance_method">
+  <h3 class="signature first" id="position-instance_method">
+  
+    - (<tt><span class='object_link'><a href="" title="SDLUdon::Sound::Music (class)">Music</a></span></tt>) <strong>position=</strong>(value) 
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    
+<p>再生位置の設定</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  
+  <div class="docstring">
+  <div class="discussion">
+    
+
+  </div>
+</div>
+<div class="tags">
+  <p class="tag_title">Parameters:</p>
+<ul class="param">
+  
+    <li>
+      
+        <span class='name'>value</span>
+      
+      
+        <span class='type'>(<tt>Float</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'>
+<p>再生位置(0.0)..(1..0)</p>
+</div>
+      
+    </li>
+  
+</ul>
+
+<p class="tag_title">Returns:</p>
+<ul class="return">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt><span class='object_link'><a href="" title="SDLUdon::Sound::Music (class)">Music</a></span></tt>)</span>
+      
+      
+      
+    </li>
+  
+</ul>
+
+</div>
+
+<p class="tag_title">Returns:</p>
+<ul class="return">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>Float</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'>
+<p>the current value of position</p>
+</div>
+      
+    </li>
+  
+</ul>
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+881
+882
+883</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File '.\sdludon_yard.rb', line 881</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_position'>position</span>
+  <span class='ivar'>@position</span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      
+      <span id="volume=-instance_method"></span>
+      <div class="method_details ">
+  <h3 class="signature " id="volume-instance_method">
   
     
       <span class="overload">- (<tt>Float</tt>) <strong>volume</strong> </span>
@@ -532,12 +664,12 @@
       <pre class="lines">
 
 
-872
-873
-874</pre>
+881
+882
+883</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File '.\sdludon_yard.rb', line 872</span>
+      <pre class="code"><span class="info file"># File '.\sdludon_yard.rb', line 881</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_volume'>volume</span>
   <span class='ivar'>@volume</span>
@@ -611,12 +743,12 @@
       <pre class="lines">
 
 
-917
-918
-919</pre>
+926
+927
+928</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File '.\sdludon_yard.rb', line 917</span>
+      <pre class="code"><span class="info file"># File '.\sdludon_yard.rb', line 926</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_fade_out'>fade_out</span><span class='lparen'>(</span><span class='id identifier rubyid_sec'>sec</span><span class='rparen'>)</span>
 	<span class='comment'># ext c code.
@@ -667,12 +799,12 @@
       <pre class="lines">
 
 
-940
-941
-942</pre>
+949
+950
+951</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File '.\sdludon_yard.rb', line 940</span>
+      <pre class="code"><span class="info file"># File '.\sdludon_yard.rb', line 949</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_fading?'>fading?</span>
 	<span class='comment'># ext c code.
@@ -752,12 +884,12 @@
       <pre class="lines">
 
 
-877
-878
-879</pre>
+886
+887
+888</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File '.\sdludon_yard.rb', line 877</span>
+      <pre class="code"><span class="info file"># File '.\sdludon_yard.rb', line 886</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_load'>load</span><span class='lparen'>(</span><span class='id identifier rubyid_filepath'>filepath</span><span class='rparen'>)</span>
 	<span class='comment'># ext c code.
@@ -795,12 +927,12 @@
       <pre class="lines">
 
 
-900
-901
-902</pre>
+909
+910
+911</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File '.\sdludon_yard.rb', line 900</span>
+      <pre class="code"><span class="info file"># File '.\sdludon_yard.rb', line 909</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_pause'>pause</span>
 	<span class='comment'># ext c code.
@@ -851,12 +983,12 @@
       <pre class="lines">
 
 
-934
-935
-936</pre>
+943
+944
+945</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File '.\sdludon_yard.rb', line 934</span>
+      <pre class="code"><span class="info file"># File '.\sdludon_yard.rb', line 943</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_paused?'>paused?</span>
 	<span class='comment'># ext c code.
@@ -1061,12 +1193,12 @@
       <pre class="lines">
 
 
-890
-891
-892</pre>
+899
+900
+901</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File '.\sdludon_yard.rb', line 890</span>
+      <pre class="code"><span class="info file"># File '.\sdludon_yard.rb', line 899</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_play'>play</span>
 	<span class='comment'># ext c code.
@@ -1117,12 +1249,12 @@
       <pre class="lines">
 
 
-928
-929
-930</pre>
+937
+938
+939</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File '.\sdludon_yard.rb', line 928</span>
+      <pre class="code"><span class="info file"># File '.\sdludon_yard.rb', line 937</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_playing?'>playing?</span>
 	<span class='comment'># ext c code.
@@ -1160,12 +1292,12 @@
       <pre class="lines">
 
 
-905
-906
-907</pre>
+914
+915
+916</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File '.\sdludon_yard.rb', line 905</span>
+      <pre class="code"><span class="info file"># File '.\sdludon_yard.rb', line 914</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_resume'>resume</span>
 	<span class='comment'># ext c code.
@@ -1203,12 +1335,12 @@
       <pre class="lines">
 
 
-922
-923
-924</pre>
+931
+932
+933</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File '.\sdludon_yard.rb', line 922</span>
+      <pre class="code"><span class="info file"># File '.\sdludon_yard.rb', line 931</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_rewind'>rewind</span>
 	<span class='comment'># ext c code.
@@ -1246,12 +1378,12 @@
       <pre class="lines">
 
 
-895
-896
-897</pre>
+904
+905
+906</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File '.\sdludon_yard.rb', line 895</span>
+      <pre class="code"><span class="info file"># File '.\sdludon_yard.rb', line 904</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_stop'>stop</span>
 	<span class='comment'># ext c code.
@@ -1306,12 +1438,12 @@
       <pre class="lines">
 
 
-911
-912
-913</pre>
+920
+921
+922</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File '.\sdludon_yard.rb', line 911</span>
+      <pre class="code"><span class="info file"># File '.\sdludon_yard.rb', line 920</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_toggle'>toggle</span>
 	<span class='comment'># ext c code.
@@ -1326,7 +1458,7 @@
 </div>
 
     <div id="footer">
-  Generated on Sun Jun  7 21:35:02 2015 by
+  Generated on Mon Jun  8 22:09:49 2015 by
   <a href="http://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.8.7.6 (ruby-2.2.2).
 </div>

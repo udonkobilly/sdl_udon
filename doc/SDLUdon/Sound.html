@@ -339,6 +339,63 @@
       
     </ul>
   
+    <h2>
+      Instance Method Summary
+      <small>(<a href="#" class="summary_toggle">collapse</a>)</small>
+    </h2>
+
+    <ul class="summary">
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#bgm_playing%3F-instance_method" title="#bgm_playing? (instance method)">- (true/false) <strong>bgm_playing?</strong> </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'>
+<p>ＢＧＭが再生中かどうか.</p>
+</div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#se_playing%3F-instance_method" title="#se_playing? (instance method)">- (true/false) <strong>se_playing?</strong> </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'>
+<p>効果音がどれか一つでも再生中かどうか.</p>
+</div></span>
+  
+</li>
+
+      
+    </ul>
+  
 
 
 
@@ -396,12 +453,12 @@
       <pre class="lines">
 
 
-863
-864
-865</pre>
+868
+869
+870</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File '.\sdludon_yard.rb', line 863</span>
+      <pre class="code"><span class="info file"># File '.\sdludon_yard.rb', line 868</span>
 
 <span class='kw'>def</span> <span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_active_se_size'>active_se_size</span>
 	<span class='comment'># ext c code.
@@ -649,12 +706,12 @@
       <pre class="lines">
 
 
+842
 843
-844
-845</pre>
+844</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File '.\sdludon_yard.rb', line 843</span>
+      <pre class="code"><span class="info file"># File '.\sdludon_yard.rb', line 842</span>
 
 <span class='kw'>def</span> <span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_pause'>pause</span>
 	<span class='comment'># ext c code.
@@ -973,12 +1030,12 @@
       <pre class="lines">
 
 
+849
 850
-851
-852</pre>
+851</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File '.\sdludon_yard.rb', line 850</span>
+      <pre class="code"><span class="info file"># File '.\sdludon_yard.rb', line 849</span>
 
 <span class='kw'>def</span> <span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_resume'>resume</span>
 	<span class='comment'># ext c code.
@@ -1046,12 +1103,12 @@
       <pre class="lines">
 
 
+835
 836
-837
-838</pre>
+837</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File '.\sdludon_yard.rb', line 836</span>
+      <pre class="code"><span class="info file"># File '.\sdludon_yard.rb', line 835</span>
 
 <span class='kw'>def</span> <span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_stop'>stop</span>
 	<span class='comment'># ext c code.
@@ -1119,16 +1176,122 @@
       <pre class="lines">
 
 
-857
-858
-859</pre>
+856</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File '.\sdludon_yard.rb', line 857</span>
+      <pre class="code"><span class="info file"># File '.\sdludon_yard.rb', line 856</span>
 
-<span class='kw'>def</span> <span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_toggle'>toggle</span>
-	<span class='comment'># ext c code.
-</span><span class='kw'>end</span></pre>
+<span class='kw'>def</span> <span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_toggle'>toggle</span> <span class='semicolon'>;</span> <span class='semicolon'>;</span> <span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+  </div>
+
+  <div id="instance_method_details" class="method_details_list">
+    <h2>Instance Method Details</h2>
+
+    
+      <div class="method_details first">
+  <h3 class="signature first" id="bgm_playing?-instance_method">
+  
+    - (<tt>true/false</tt>) <strong>bgm_playing?</strong> 
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    
+<p>ＢＧＭが再生中かどうか</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  
+  
+
+<p class="tag_title">Returns:</p>
+<ul class="return">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>true/false</tt>)</span>
+      
+      
+      
+    </li>
+  
+</ul>
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+864</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File '.\sdludon_yard.rb', line 864</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_bgm_playing?'>bgm_playing?</span> <span class='semicolon'>;</span> <span class='semicolon'>;</span> <span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="se_playing?-instance_method">
+  
+    - (<tt>true/false</tt>) <strong>se_playing?</strong> 
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    
+<p>効果音がどれか一つでも再生中かどうか</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  
+  
+
+<p class="tag_title">Returns:</p>
+<ul class="return">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>true/false</tt>)</span>
+      
+      
+      
+    </li>
+  
+</ul>
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+860</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File '.\sdludon_yard.rb', line 860</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_se_playing?'>se_playing?</span> <span class='semicolon'>;</span> <span class='semicolon'>;</span> <span class='kw'>end</span></pre>
     </td>
   </tr>
 </table>
@@ -1139,7 +1302,7 @@
 </div>
 
     <div id="footer">
-  Generated on Sun Jun  7 21:34:59 2015 by
+  Generated on Mon Jun  8 22:09:45 2015 by
   <a href="http://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.8.7.6 (ruby-2.2.2).
 </div>
