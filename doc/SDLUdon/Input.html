@@ -272,30 +272,6 @@ mouse_sym =&gt;  :lbtn, :mbtn, :rbtn</code></pre>
         <li class="public ">
   <span class="summary_signature">
     
-      <a href="#key_repeat-class_method" title="key_repeat (class method)">+ (self) <strong>key_repeat</strong>(key_sym, duration = 1, wait = -1,, interval = 0) </a>
-    
-
-    
-  </span>
-  
-  
-  
-  
-  
-  
-  
-
-  
-    <span class="summary_desc"><div class='inline'>
-<p>キーボードのリピート設定を行います。.</p>
-</div></span>
-  
-</li>
-
-      
-        <li class="public ">
-  <span class="summary_signature">
-    
       <a href="#key_up%3F-class_method" title="key_up? (class method)">+ (true/false) <strong>key_up?</strong>(key_sym) </a>
     
 
@@ -599,7 +575,9 @@ mouse_sym =&gt;  :lbtn, :mbtn, :rbtn</code></pre>
 
   
     <span class="summary_desc"><div class='inline'>
-<p>ゲームパッドのリピート設定を行います。.</p>
+<p>キーボード・ゲームパッド・マウス全てのリピート値(フレーム単位)を同時に設定します。 
+リピートとは、押した瞬間の判定時間や、二回目以降の判定間隔に適用される値です。   (
+#key_push?等、push?系メソッドの挙動を変えるもので、down?及びup?には影響はありません ).</p>
 </div></span>
   
 </li>
@@ -696,32 +674,6 @@ mouse_sym =&gt;  :lbtn, :mbtn, :rbtn</code></pre>
   
     <span class="summary_desc"><div class='inline'>
 <p>同時に押された全てのパッドボタンを取得します。.</p>
-</div></span>
-  
-</li>
-
-      
-        <li class="public ">
-  <span class="summary_signature">
-    
-      <a href="#set_repeat-class_method" title="set_repeat (class method)">+ (self) <strong>set_repeat</strong>(duration = 1, wait = -1,, interval = 0, pad_index = -1)) </a>
-    
-
-    
-  </span>
-  
-  
-  
-  
-  
-  
-  
-
-  
-    <span class="summary_desc"><div class='inline'>
-<p>キーボード・ゲームパッド・マウス全てのリピート値(フレーム単位)を同時に設定します。 
-リピートとは、押した瞬間の判定時間や、二回目以降の判定間隔に適用される値です。   (
-#key_push?等、push?系メソッドの挙動を変えるもので、down?及びup?には影響はありません ).</p>
 </div></span>
   
 </li>
@@ -1046,10 +998,10 @@ mouse_sym =&gt;  :lbtn, :mbtn, :rbtn</code></pre>
       <pre class="lines">
 
 
-1241</pre>
+1227</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File '.\sdludon_yard.rb', line 1241</span>
+      <pre class="code"><span class="info file"># File '.\sdludon_yard.rb', line 1227</span>
 
 <span class='kw'>def</span> <span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_config'>config</span><span class='lparen'>(</span><span class='id identifier rubyid_key_sym'>key_sym</span><span class='comma'>,</span> <span class='id identifier rubyid_pad_sym'>pad_sym</span><span class='comma'>,</span> <span class='id identifier rubyid_pad_index'>pad_index</span><span class='comma'>,</span> <span class='id identifier rubyid_mouse_sym'>mouse_sym</span> <span class='rparen'>)</span> <span class='semicolon'>;</span> <span class='semicolon'>;</span> <span class='kw'>end</span></pre>
     </td>
@@ -1103,10 +1055,10 @@ mouse_sym =&gt;  :lbtn, :mbtn, :rbtn</code></pre>
       <pre class="lines">
 
 
-1265</pre>
+1251</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File '.\sdludon_yard.rb', line 1265</span>
+      <pre class="code"><span class="info file"># File '.\sdludon_yard.rb', line 1251</span>
 
 <span class='kw'>def</span> <span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_down_keys'>down_keys</span> <span class='semicolon'>;</span> <span class='semicolon'>;</span> <span class='kw'>end</span></pre>
     </td>
@@ -1160,10 +1112,10 @@ mouse_sym =&gt;  :lbtn, :mbtn, :rbtn</code></pre>
       <pre class="lines">
 
 
-1328</pre>
+1314</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File '.\sdludon_yard.rb', line 1328</span>
+      <pre class="code"><span class="info file"># File '.\sdludon_yard.rb', line 1314</span>
 
 <span class='kw'>def</span> <span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_down_mouses'>down_mouses</span> <span class='semicolon'>;</span> <span class='semicolon'>;</span> <span class='kw'>end</span></pre>
     </td>
@@ -1217,10 +1169,10 @@ mouse_sym =&gt;  :lbtn, :mbtn, :rbtn</code></pre>
       <pre class="lines">
 
 
-1296</pre>
+1282</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File '.\sdludon_yard.rb', line 1296</span>
+      <pre class="code"><span class="info file"># File '.\sdludon_yard.rb', line 1282</span>
 
 <span class='kw'>def</span> <span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_down_pads'>down_pads</span><span class='lparen'>(</span><span class='id identifier rubyid_index'>index</span> <span class='op'>=</span> <span class='int'>0</span><span class='rparen'>)</span> <span class='semicolon'>;</span> <span class='semicolon'>;</span> <span class='kw'>end</span></pre>
     </td>
@@ -1293,10 +1245,10 @@ mouse_sym =&gt;  :lbtn, :mbtn, :rbtn</code></pre>
       <pre class="lines">
 
 
-1251</pre>
+1237</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File '.\sdludon_yard.rb', line 1251</span>
+      <pre class="code"><span class="info file"># File '.\sdludon_yard.rb', line 1237</span>
 
 <span class='kw'>def</span> <span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_key_down?'>key_down?</span><span class='lparen'>(</span><span class='id identifier rubyid_key_sym'>key_sym</span><span class='rparen'>)</span> <span class='semicolon'>;</span> <span class='semicolon'>;</span> <span class='kw'>end</span></pre>
     </td>
@@ -1374,130 +1326,12 @@ mouse_sym =&gt;  :lbtn, :mbtn, :rbtn</code></pre>
       <pre class="lines">
 
 
-1257</pre>
+1243</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File '.\sdludon_yard.rb', line 1257</span>
+      <pre class="code"><span class="info file"># File '.\sdludon_yard.rb', line 1243</span>
 
 <span class='kw'>def</span> <span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_key_push?'>key_push?</span><span class='lparen'>(</span><span class='id identifier rubyid_key_sym'>key_sym</span><span class='rparen'>)</span> <span class='semicolon'>;</span> <span class='semicolon'>;</span> <span class='kw'>end</span></pre>
-    </td>
-  </tr>
-</table>
-</div>
-    
-      <div class="method_details ">
-  <h3 class="signature " id="key_repeat-class_method">
-  
-    
-      <span class="overload">+ (<tt>self</tt>) <strong>key_repeat</strong>(key_sym, duration = 1, wait = -1, interval = 0) </span>
-    
-      <span class="overload">+ (<tt>self</tt>) <strong>key_repeat</strong>(duration = 1, wait = -1, interval = 0) </span>
-    
-  
-
-  
-
-  
-</h3><div class="docstring">
-  <div class="discussion">
-    
-<p>キーボードのリピート設定を行います。</p>
-
-
-  </div>
-</div>
-<div class="tags">
-  
-  <p class="tag_title">Overloads:</p>
-  <ul class="overload">
-    
-      
-      <li class="overload_item">
-        <span class="signature">+ (<tt>self</tt>) <strong>key_repeat</strong>(key_sym, duration = 1, wait = -1, interval = 0) </span>
-        <div class="docstring">
-  <div class="discussion">
-    
-
-  </div>
-</div>
-<div class="tags">
-  <p class="tag_title">Parameters:</p>
-<ul class="param">
-  
-    <li>
-      
-        <span class='name'>key_sym</span>
-      
-      
-        <span class='type'>(<tt>String or Symbol</tt>)</span>
-      
-      
-      
-        &mdash;
-        <div class='inline'>
-<p>適用するキーの名前</p>
-</div>
-      
-    </li>
-  
-</ul>
-
-
-</div>
-      </li>
-    
-      
-      <li class="overload_item">
-        <span class="signature">+ (<tt>self</tt>) <strong>key_repeat</strong>(duration = 1, wait = -1, interval = 0) </span>
-        <div class="docstring">
-  <div class="discussion">
-    
-<p>こちらは全てのキーに適用されます。</p>
-
-
-  </div>
-</div>
-<div class="tags">
-  
-
-</div>
-      </li>
-    
-  </ul>
-
-<p class="tag_title">Returns:</p>
-<ul class="return">
-  
-    <li>
-      
-      
-        <span class='type'>(<tt>self</tt>)</span>
-      
-      
-      
-    </li>
-  
-</ul>
-
-  <p class="tag_title">See Also:</p>
-  <ul class="see">
-    
-      <li><span class='object_link'><a href="#set_repeat-class_method" title="SDLUdon::Input.set_repeat (method)">set_repeat</a></span></li>
-    
-  </ul>
-
-</div><table class="source_code">
-  <tr>
-    <td>
-      <pre class="lines">
-
-
-1212</pre>
-    </td>
-    <td>
-      <pre class="code"><span class="info file"># File '.\sdludon_yard.rb', line 1212</span>
-
-<span class='kw'>def</span> <span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_key_repeat'>key_repeat</span><span class='lparen'>(</span><span class='id identifier rubyid_key_sym'>key_sym</span><span class='comma'>,</span> <span class='id identifier rubyid_duration'>duration</span> <span class='op'>=</span> <span class='int'>1</span><span class='comma'>,</span> <span class='id identifier rubyid_wait'>wait</span> <span class='op'>=</span> <span class='op'>-</span><span class='int'>1</span><span class='comma'>,</span> <span class='id identifier rubyid_interval'>interval</span> <span class='op'>=</span> <span class='int'>0</span><span class='rparen'>)</span> <span class='semicolon'>;</span> <span class='semicolon'>;</span> <span class='kw'>end</span></pre>
     </td>
   </tr>
 </table>
@@ -1573,10 +1407,10 @@ mouse_sym =&gt;  :lbtn, :mbtn, :rbtn</code></pre>
       <pre class="lines">
 
 
-1246</pre>
+1232</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File '.\sdludon_yard.rb', line 1246</span>
+      <pre class="code"><span class="info file"># File '.\sdludon_yard.rb', line 1232</span>
 
 <span class='kw'>def</span> <span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_key_up?'>key_up?</span><span class='lparen'>(</span><span class='id identifier rubyid_key_sym'>key_sym</span><span class='rparen'>)</span> <span class='semicolon'>;</span> <span class='semicolon'>;</span> <span class='kw'>end</span></pre>
     </td>
@@ -1649,10 +1483,10 @@ mouse_sym =&gt;  :lbtn, :mbtn, :rbtn</code></pre>
       <pre class="lines">
 
 
-1310</pre>
+1296</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File '.\sdludon_yard.rb', line 1310</span>
+      <pre class="code"><span class="info file"># File '.\sdludon_yard.rb', line 1296</span>
 
 <span class='kw'>def</span> <span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_mouse_down?'>mouse_down?</span><span class='lparen'>(</span><span class='id identifier rubyid_mouse_sym'>mouse_sym</span><span class='rparen'>)</span> <span class='semicolon'>;</span> <span class='semicolon'>;</span> <span class='kw'>end</span></pre>
     </td>
@@ -1701,10 +1535,10 @@ mouse_sym =&gt;  :lbtn, :mbtn, :rbtn</code></pre>
       <pre class="lines">
 
 
-1320</pre>
+1306</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File '.\sdludon_yard.rb', line 1320</span>
+      <pre class="code"><span class="info file"># File '.\sdludon_yard.rb', line 1306</span>
 
 <span class='kw'>def</span> <span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_mouse_moving?'>mouse_moving?</span> <span class='semicolon'>;</span> <span class='semicolon'>;</span> <span class='kw'>end</span></pre>
     </td>
@@ -1782,10 +1616,10 @@ mouse_sym =&gt;  :lbtn, :mbtn, :rbtn</code></pre>
       <pre class="lines">
 
 
-1316</pre>
+1302</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File '.\sdludon_yard.rb', line 1316</span>
+      <pre class="code"><span class="info file"># File '.\sdludon_yard.rb', line 1302</span>
 
 <span class='kw'>def</span> <span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_mouse_push?'>mouse_push?</span><span class='lparen'>(</span><span class='id identifier rubyid_mouse_sym'>mouse_sym</span><span class='rparen'>)</span> <span class='semicolon'>;</span> <span class='semicolon'>;</span> <span class='kw'>end</span></pre>
     </td>
@@ -1900,10 +1734,10 @@ mouse_sym =&gt;  :lbtn, :mbtn, :rbtn</code></pre>
       <pre class="lines">
 
 
-1229</pre>
+1215</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File '.\sdludon_yard.rb', line 1229</span>
+      <pre class="code"><span class="info file"># File '.\sdludon_yard.rb', line 1215</span>
 
 <span class='kw'>def</span> <span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_mouse_repeat'>mouse_repeat</span><span class='lparen'>(</span><span class='id identifier rubyid_pad_sym'>pad_sym</span><span class='comma'>,</span> <span class='id identifier rubyid_duration'>duration</span> <span class='op'>=</span> <span class='int'>1</span><span class='comma'>,</span> <span class='id identifier rubyid_wait'>wait</span> <span class='op'>=</span> <span class='op'>-</span><span class='int'>1</span><span class='comma'>,</span> <span class='id identifier rubyid_interval'>interval</span> <span class='op'>=</span> <span class='int'>0</span><span class='comma'>,</span> <span class='id identifier rubyid_pad_index'>pad_index</span> <span class='op'>=</span> <span class='int'>0</span><span class='rparen'>)</span> <span class='semicolon'>;</span> <span class='semicolon'>;</span> <span class='kw'>end</span></pre>
     </td>
@@ -1976,10 +1810,10 @@ mouse_sym =&gt;  :lbtn, :mbtn, :rbtn</code></pre>
       <pre class="lines">
 
 
-1305</pre>
+1291</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File '.\sdludon_yard.rb', line 1305</span>
+      <pre class="code"><span class="info file"># File '.\sdludon_yard.rb', line 1291</span>
 
 <span class='kw'>def</span> <span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_mouse_up?'>mouse_up?</span><span class='lparen'>(</span><span class='id identifier rubyid_mouse_sym'>mouse_sym</span><span class='rparen'>)</span> <span class='semicolon'>;</span> <span class='semicolon'>;</span> <span class='kw'>end</span></pre>
     </td>
@@ -2033,10 +1867,10 @@ mouse_sym =&gt;  :lbtn, :mbtn, :rbtn</code></pre>
       <pre class="lines">
 
 
-1344</pre>
+1330</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File '.\sdludon_yard.rb', line 1344</span>
+      <pre class="code"><span class="info file"># File '.\sdludon_yard.rb', line 1330</span>
 
 <span class='kw'>def</span> <span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_mouse_wheel'>mouse_wheel</span> <span class='semicolon'>;</span> <span class='semicolon'>;</span> <span class='kw'>end</span></pre>
     </td>
@@ -2090,10 +1924,10 @@ mouse_sym =&gt;  :lbtn, :mbtn, :rbtn</code></pre>
       <pre class="lines">
 
 
-1336</pre>
+1322</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File '.\sdludon_yard.rb', line 1336</span>
+      <pre class="code"><span class="info file"># File '.\sdludon_yard.rb', line 1322</span>
 
 <span class='kw'>def</span> <span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_mouse_x'>mouse_x</span> <span class='semicolon'>;</span> <span class='semicolon'>;</span> <span class='kw'>end</span></pre>
     </td>
@@ -2147,10 +1981,10 @@ mouse_sym =&gt;  :lbtn, :mbtn, :rbtn</code></pre>
       <pre class="lines">
 
 
-1340</pre>
+1326</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File '.\sdludon_yard.rb', line 1340</span>
+      <pre class="code"><span class="info file"># File '.\sdludon_yard.rb', line 1326</span>
 
 <span class='kw'>def</span> <span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_mouse_y'>mouse_y</span> <span class='semicolon'>;</span> <span class='semicolon'>;</span> <span class='kw'>end</span></pre>
     </td>
@@ -2246,10 +2080,10 @@ mouse_sym =&gt;  :lbtn, :mbtn, :rbtn</code></pre>
       <pre class="lines">
 
 
-1281</pre>
+1267</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File '.\sdludon_yard.rb', line 1281</span>
+      <pre class="code"><span class="info file"># File '.\sdludon_yard.rb', line 1267</span>
 
 <span class='kw'>def</span> <span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_pad_down?'>pad_down?</span><span class='lparen'>(</span><span class='id identifier rubyid_pad_sym'>pad_sym</span><span class='comma'>,</span> <span class='id identifier rubyid_index'>index</span> <span class='op'>=</span> <span class='int'>0</span><span class='rparen'>)</span> <span class='semicolon'>;</span> <span class='semicolon'>;</span> <span class='kw'>end</span></pre>
     </td>
@@ -2303,10 +2137,10 @@ mouse_sym =&gt;  :lbtn, :mbtn, :rbtn</code></pre>
       <pre class="lines">
 
 
-1191</pre>
+1195</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File '.\sdludon_yard.rb', line 1191</span>
+      <pre class="code"><span class="info file"># File '.\sdludon_yard.rb', line 1195</span>
 
 <span class='kw'>def</span> <span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_pad_num'>pad_num</span> <span class='semicolon'>;</span> <span class='semicolon'>;</span> <span class='kw'>end</span></pre>
     </td>
@@ -2402,10 +2236,10 @@ mouse_sym =&gt;  :lbtn, :mbtn, :rbtn</code></pre>
       <pre class="lines">
 
 
-1288</pre>
+1274</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File '.\sdludon_yard.rb', line 1288</span>
+      <pre class="code"><span class="info file"># File '.\sdludon_yard.rb', line 1274</span>
 
 <span class='kw'>def</span> <span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_pad_push?'>pad_push?</span><span class='lparen'>(</span><span class='id identifier rubyid_index'>index</span> <span class='op'>=</span> <span class='int'>0</span><span class='rparen'>)</span> <span class='semicolon'>;</span> <span class='semicolon'>;</span> <span class='kw'>end</span></pre>
     </td>
@@ -2415,412 +2249,6 @@ mouse_sym =&gt;  :lbtn, :mbtn, :rbtn</code></pre>
     
       <div class="method_details ">
   <h3 class="signature " id="pad_repeat-class_method">
-  
-    
-      <span class="overload">+ (<tt>self</tt>) <strong>pad_repeat</strong>(key_sym, duration = 1, wait = -1, interval = 0, pad_index = 0) </span>
-    
-      <span class="overload">+ (<tt>self</tt>) <strong>pad_repeat</strong>(duration = 1, wait = -1, interval = 0, pad_index = 0) </span>
-    
-  
-
-  
-
-  
-</h3><div class="docstring">
-  <div class="discussion">
-    
-<p>ゲームパッドのリピート設定を行います。</p>
-
-
-  </div>
-</div>
-<div class="tags">
-  
-  <p class="tag_title">Overloads:</p>
-  <ul class="overload">
-    
-      
-      <li class="overload_item">
-        <span class="signature">+ (<tt>self</tt>) <strong>pad_repeat</strong>(key_sym, duration = 1, wait = -1, interval = 0, pad_index = 0) </span>
-        <div class="docstring">
-  <div class="discussion">
-    
-
-  </div>
-</div>
-<div class="tags">
-  <p class="tag_title">Parameters:</p>
-<ul class="param">
-  
-    <li>
-      
-        <span class='name'>pad_sym</span>
-      
-      
-        <span class='type'>(<tt>String or Symbol</tt>)</span>
-      
-      
-      
-        &mdash;
-        <div class='inline'>
-<p>適用するボタンの名前</p>
-</div>
-      
-    </li>
-  
-    <li>
-      
-        <span class='name'>pad_index</span>
-      
-      
-        <span class='type'>(<tt>Fixnum</tt>)</span>
-      
-      
-        <em class="default">(defaults to: <tt>0</tt>)</em>
-      
-      
-        &mdash;
-        <div class='inline'>
-<p>複数のゲームパッドが接続された場合の、識別番号</p>
-</div>
-      
-    </li>
-  
-</ul>
-
-
-</div>
-      </li>
-    
-      
-      <li class="overload_item">
-        <span class="signature">+ (<tt>self</tt>) <strong>pad_repeat</strong>(duration = 1, wait = -1, interval = 0, pad_index = 0) </span>
-        <div class="docstring">
-  <div class="discussion">
-    
-<p>こちらは全てのボタンに適用されます。</p>
-
-
-  </div>
-</div>
-<div class="tags">
-  
-
-</div>
-      </li>
-    
-  </ul>
-
-<p class="tag_title">Returns:</p>
-<ul class="return">
-  
-    <li>
-      
-      
-        <span class='type'>(<tt>self</tt>)</span>
-      
-      
-      
-    </li>
-  
-</ul>
-
-  <p class="tag_title">See Also:</p>
-  <ul class="see">
-    
-      <li>#set_repeat</li>
-    
-  </ul>
-
-</div><table class="source_code">
-  <tr>
-    <td>
-      <pre class="lines">
-
-
-1221</pre>
-    </td>
-    <td>
-      <pre class="code"><span class="info file"># File '.\sdludon_yard.rb', line 1221</span>
-
-<span class='kw'>def</span> <span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_pad_repeat'>pad_repeat</span><span class='lparen'>(</span><span class='id identifier rubyid_pad_sym'>pad_sym</span><span class='comma'>,</span> <span class='id identifier rubyid_duration'>duration</span> <span class='op'>=</span> <span class='int'>1</span><span class='comma'>,</span> <span class='id identifier rubyid_wait'>wait</span> <span class='op'>=</span> <span class='op'>-</span><span class='int'>1</span><span class='comma'>,</span> <span class='id identifier rubyid_interval'>interval</span> <span class='op'>=</span> <span class='int'>0</span><span class='comma'>,</span> <span class='id identifier rubyid_pad_index'>pad_index</span> <span class='op'>=</span> <span class='int'>0</span><span class='rparen'>)</span> <span class='semicolon'>;</span> <span class='semicolon'>;</span> <span class='kw'>end</span></pre>
-    </td>
-  </tr>
-</table>
-</div>
-    
-      <div class="method_details ">
-  <h3 class="signature " id="pad_up?-class_method">
-  
-    + (<tt>true/false</tt>) <strong>pad_up?</strong>(pad_sym, index = 0) 
-  
-
-  
-
-  
-</h3><div class="docstring">
-  <div class="discussion">
-    
-<p>指定したゲームパッドボタンが離されたかどうか</p>
-
-
-  </div>
-</div>
-<div class="tags">
-  
-  <div class="docstring">
-  <div class="discussion">
-    
-
-  </div>
-</div>
-<div class="tags">
-  <p class="tag_title">Parameters:</p>
-<ul class="param">
-  
-    <li>
-      
-        <span class='name'>pad_sym</span>
-      
-      
-        <span class='type'>(<tt>String or Symbol</tt>)</span>
-      
-      
-      
-        &mdash;
-        <div class='inline'>
-<p>指定したいボタン番号</p>
-</div>
-      
-    </li>
-  
-    <li>
-      
-        <span class='name'>index</span>
-      
-      
-        <span class='type'>(<tt>Fixnum</tt>)</span>
-      
-      
-        <em class="default">(defaults to: <tt>0</tt>)</em>
-      
-      
-        &mdash;
-        <div class='inline'>
-<p>複数のゲームパッドが接続された時の識別番号</p>
-</div>
-      
-    </li>
-  
-</ul>
-
-
-</div>
-
-<p class="tag_title">Returns:</p>
-<ul class="return">
-  
-    <li>
-      
-      
-        <span class='type'>(<tt>true/false</tt>)</span>
-      
-      
-      
-    </li>
-  
-</ul>
-
-</div><table class="source_code">
-  <tr>
-    <td>
-      <pre class="lines">
-
-
-1275</pre>
-    </td>
-    <td>
-      <pre class="code"><span class="info file"># File '.\sdludon_yard.rb', line 1275</span>
-
-<span class='kw'>def</span> <span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_pad_up?'>pad_up?</span><span class='lparen'>(</span><span class='id identifier rubyid_pad_sym'>pad_sym</span><span class='comma'>,</span> <span class='id identifier rubyid_index'>index</span> <span class='op'>=</span> <span class='int'>0</span><span class='rparen'>)</span> <span class='semicolon'>;</span> <span class='semicolon'>;</span> <span class='kw'>end</span></pre>
-    </td>
-  </tr>
-</table>
-</div>
-    
-      <div class="method_details ">
-  <h3 class="signature " id="push_keys-class_method">
-  
-    + (<tt>Array</tt>) <strong>push_keys</strong> 
-  
-
-  
-
-  
-</h3><div class="docstring">
-  <div class="discussion">
-    
-<p>同時に押された全てのキーを取得します。</p>
-
-
-  </div>
-</div>
-<div class="tags">
-  
-  
-
-<p class="tag_title">Returns:</p>
-<ul class="return">
-  
-    <li>
-      
-      
-        <span class='type'>(<tt>Array</tt>)</span>
-      
-      
-      
-        &mdash;
-        <div class='inline'>
-<p>キーシンボル配列(:a, :b, :c.…)</p>
-</div>
-      
-    </li>
-  
-</ul>
-
-</div><table class="source_code">
-  <tr>
-    <td>
-      <pre class="lines">
-
-
-1269</pre>
-    </td>
-    <td>
-      <pre class="code"><span class="info file"># File '.\sdludon_yard.rb', line 1269</span>
-
-<span class='kw'>def</span> <span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_push_keys'>push_keys</span> <span class='semicolon'>;</span> <span class='semicolon'>;</span> <span class='kw'>end</span></pre>
-    </td>
-  </tr>
-</table>
-</div>
-    
-      <div class="method_details ">
-  <h3 class="signature " id="push_mouses-class_method">
-  
-    + (<tt>Array</tt>) <strong>push_mouses</strong> 
-  
-
-  
-
-  
-</h3><div class="docstring">
-  <div class="discussion">
-    
-<p>同時に押された全てのマウスボタンを取得します。</p>
-
-
-  </div>
-</div>
-<div class="tags">
-  
-  
-
-<p class="tag_title">Returns:</p>
-<ul class="return">
-  
-    <li>
-      
-      
-        <span class='type'>(<tt>Array</tt>)</span>
-      
-      
-      
-        &mdash;
-        <div class='inline'>
-<p>ボタンシンボル配列(:a, :b, :c.…)</p>
-</div>
-      
-    </li>
-  
-</ul>
-
-</div><table class="source_code">
-  <tr>
-    <td>
-      <pre class="lines">
-
-
-1332</pre>
-    </td>
-    <td>
-      <pre class="code"><span class="info file"># File '.\sdludon_yard.rb', line 1332</span>
-
-<span class='kw'>def</span> <span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_push_mouses'>push_mouses</span> <span class='semicolon'>;</span> <span class='semicolon'>;</span> <span class='kw'>end</span></pre>
-    </td>
-  </tr>
-</table>
-</div>
-    
-      <div class="method_details ">
-  <h3 class="signature " id="push_pads-class_method">
-  
-    + (<tt>Array</tt>) <strong>push_pads</strong> 
-  
-
-  
-
-  
-</h3><div class="docstring">
-  <div class="discussion">
-    
-<p>同時に押された全てのパッドボタンを取得します。</p>
-
-
-  </div>
-</div>
-<div class="tags">
-  
-  
-
-<p class="tag_title">Returns:</p>
-<ul class="return">
-  
-    <li>
-      
-      
-        <span class='type'>(<tt>Array</tt>)</span>
-      
-      
-      
-        &mdash;
-        <div class='inline'>
-<p>ボタンシンボル配列(:_0, :_1, :_2.…)</p>
-</div>
-      
-    </li>
-  
-</ul>
-
-</div><table class="source_code">
-  <tr>
-    <td>
-      <pre class="lines">
-
-
-1300</pre>
-    </td>
-    <td>
-      <pre class="code"><span class="info file"># File '.\sdludon_yard.rb', line 1300</span>
-
-<span class='kw'>def</span> <span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_push_pads'>push_pads</span><span class='lparen'>(</span><span class='id identifier rubyid_index'>index</span> <span class='op'>=</span> <span class='int'>0</span><span class='rparen'>)</span> <span class='semicolon'>;</span> <span class='semicolon'>;</span> <span class='kw'>end</span></pre>
-    </td>
-  </tr>
-</table>
-</div>
-    
-      <div class="method_details ">
-  <h3 class="signature " id="set_repeat-class_method">
   
     
       <span class="overload">+ (<tt>self</tt>) <strong>set_repeat</strong>(duration = 1, wait = -1, interval = 0, pad_index = -1) </span>
@@ -2996,12 +2424,282 @@ mouse_sym =&gt;  :lbtn, :mbtn, :rbtn</code></pre>
       <pre class="lines">
 
 
-1203</pre>
+1207</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File '.\sdludon_yard.rb', line 1203</span>
+      <pre class="code"><span class="info file"># File '.\sdludon_yard.rb', line 1207</span>
 
-<span class='kw'>def</span> <span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_set_repeat'>set_repeat</span><span class='lparen'>(</span><span class='id identifier rubyid_duration'>duration</span> <span class='op'>=</span> <span class='int'>1</span><span class='comma'>,</span> <span class='id identifier rubyid_wait'>wait</span> <span class='op'>=</span> <span class='op'>-</span><span class='int'>1</span><span class='comma'>,</span> <span class='id identifier rubyid_interval'>interval</span> <span class='op'>=</span> <span class='int'>0</span><span class='comma'>,</span> <span class='id identifier rubyid_pad_index'>pad_index</span> <span class='op'>=</span> <span class='op'>-</span><span class='int'>1</span><span class='rparen'>)</span>  <span class='semicolon'>;</span> <span class='semicolon'>;</span> <span class='kw'>end</span></pre>
+<span class='kw'>def</span> <span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_pad_repeat'>pad_repeat</span><span class='lparen'>(</span><span class='id identifier rubyid_pad_sym'>pad_sym</span><span class='comma'>,</span> <span class='id identifier rubyid_duration'>duration</span> <span class='op'>=</span> <span class='int'>1</span><span class='comma'>,</span> <span class='id identifier rubyid_wait'>wait</span> <span class='op'>=</span> <span class='op'>-</span><span class='int'>1</span><span class='comma'>,</span> <span class='id identifier rubyid_interval'>interval</span> <span class='op'>=</span> <span class='int'>0</span><span class='comma'>,</span> <span class='id identifier rubyid_pad_index'>pad_index</span> <span class='op'>=</span> <span class='int'>0</span><span class='rparen'>)</span> <span class='semicolon'>;</span> <span class='semicolon'>;</span> <span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="pad_up?-class_method">
+  
+    + (<tt>true/false</tt>) <strong>pad_up?</strong>(pad_sym, index = 0) 
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    
+<p>指定したゲームパッドボタンが離されたかどうか</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  
+  <div class="docstring">
+  <div class="discussion">
+    
+
+  </div>
+</div>
+<div class="tags">
+  <p class="tag_title">Parameters:</p>
+<ul class="param">
+  
+    <li>
+      
+        <span class='name'>pad_sym</span>
+      
+      
+        <span class='type'>(<tt>String or Symbol</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'>
+<p>指定したいボタン番号</p>
+</div>
+      
+    </li>
+  
+    <li>
+      
+        <span class='name'>index</span>
+      
+      
+        <span class='type'>(<tt>Fixnum</tt>)</span>
+      
+      
+        <em class="default">(defaults to: <tt>0</tt>)</em>
+      
+      
+        &mdash;
+        <div class='inline'>
+<p>複数のゲームパッドが接続された時の識別番号</p>
+</div>
+      
+    </li>
+  
+</ul>
+
+
+</div>
+
+<p class="tag_title">Returns:</p>
+<ul class="return">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>true/false</tt>)</span>
+      
+      
+      
+    </li>
+  
+</ul>
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+1261</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File '.\sdludon_yard.rb', line 1261</span>
+
+<span class='kw'>def</span> <span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_pad_up?'>pad_up?</span><span class='lparen'>(</span><span class='id identifier rubyid_pad_sym'>pad_sym</span><span class='comma'>,</span> <span class='id identifier rubyid_index'>index</span> <span class='op'>=</span> <span class='int'>0</span><span class='rparen'>)</span> <span class='semicolon'>;</span> <span class='semicolon'>;</span> <span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="push_keys-class_method">
+  
+    + (<tt>Array</tt>) <strong>push_keys</strong> 
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    
+<p>同時に押された全てのキーを取得します。</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  
+  
+
+<p class="tag_title">Returns:</p>
+<ul class="return">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>Array</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'>
+<p>キーシンボル配列(:a, :b, :c.…)</p>
+</div>
+      
+    </li>
+  
+</ul>
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+1255</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File '.\sdludon_yard.rb', line 1255</span>
+
+<span class='kw'>def</span> <span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_push_keys'>push_keys</span> <span class='semicolon'>;</span> <span class='semicolon'>;</span> <span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="push_mouses-class_method">
+  
+    + (<tt>Array</tt>) <strong>push_mouses</strong> 
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    
+<p>同時に押された全てのマウスボタンを取得します。</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  
+  
+
+<p class="tag_title">Returns:</p>
+<ul class="return">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>Array</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'>
+<p>ボタンシンボル配列(:a, :b, :c.…)</p>
+</div>
+      
+    </li>
+  
+</ul>
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+1318</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File '.\sdludon_yard.rb', line 1318</span>
+
+<span class='kw'>def</span> <span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_push_mouses'>push_mouses</span> <span class='semicolon'>;</span> <span class='semicolon'>;</span> <span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="push_pads-class_method">
+  
+    + (<tt>Array</tt>) <strong>push_pads</strong> 
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    
+<p>同時に押された全てのパッドボタンを取得します。</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  
+  
+
+<p class="tag_title">Returns:</p>
+<ul class="return">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>Array</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'>
+<p>ボタンシンボル配列(:_0, :_1, :_2.…)</p>
+</div>
+      
+    </li>
+  
+</ul>
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+1286</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File '.\sdludon_yard.rb', line 1286</span>
+
+<span class='kw'>def</span> <span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_push_pads'>push_pads</span><span class='lparen'>(</span><span class='id identifier rubyid_index'>index</span> <span class='op'>=</span> <span class='int'>0</span><span class='rparen'>)</span> <span class='semicolon'>;</span> <span class='semicolon'>;</span> <span class='kw'>end</span></pre>
     </td>
   </tr>
 </table>
@@ -3053,10 +2751,10 @@ mouse_sym =&gt;  :lbtn, :mbtn, :rbtn</code></pre>
       <pre class="lines">
 
 
-1261</pre>
+1247</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File '.\sdludon_yard.rb', line 1261</span>
+      <pre class="code"><span class="info file"># File '.\sdludon_yard.rb', line 1247</span>
 
 <span class='kw'>def</span> <span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_up_keys'>up_keys</span> <span class='semicolon'>;</span> <span class='semicolon'>;</span> <span class='kw'>end</span></pre>
     </td>
@@ -3110,10 +2808,10 @@ mouse_sym =&gt;  :lbtn, :mbtn, :rbtn</code></pre>
       <pre class="lines">
 
 
-1324</pre>
+1310</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File '.\sdludon_yard.rb', line 1324</span>
+      <pre class="code"><span class="info file"># File '.\sdludon_yard.rb', line 1310</span>
 
 <span class='kw'>def</span> <span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_up_mouses'>up_mouses</span> <span class='semicolon'>;</span> <span class='semicolon'>;</span> <span class='kw'>end</span></pre>
     </td>
@@ -3167,10 +2865,10 @@ mouse_sym =&gt;  :lbtn, :mbtn, :rbtn</code></pre>
       <pre class="lines">
 
 
-1292</pre>
+1278</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File '.\sdludon_yard.rb', line 1292</span>
+      <pre class="code"><span class="info file"># File '.\sdludon_yard.rb', line 1278</span>
 
 <span class='kw'>def</span> <span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_up_pads'>up_pads</span><span class='lparen'>(</span><span class='id identifier rubyid_index'>index</span> <span class='op'>=</span> <span class='int'>0</span><span class='rparen'>)</span> <span class='semicolon'>;</span> <span class='semicolon'>;</span> <span class='kw'>end</span></pre>
     </td>
@@ -3193,10 +2891,10 @@ mouse_sym =&gt;  :lbtn, :mbtn, :rbtn</code></pre>
       <pre class="lines">
 
 
-1355</pre>
+1341</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File '.\sdludon_yard.rb', line 1355</span>
+      <pre class="code"><span class="info file"># File '.\sdludon_yard.rb', line 1341</span>
 
 <span class='kw'>def</span> <span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_x'>x</span> <span class='semicolon'>;</span> <span class='semicolon'>;</span> <span class='kw'>end</span></pre>
     </td>
@@ -3250,10 +2948,10 @@ mouse_sym =&gt;  :lbtn, :mbtn, :rbtn</code></pre>
       <pre class="lines">
 
 
-1359</pre>
+1345</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File '.\sdludon_yard.rb', line 1359</span>
+      <pre class="code"><span class="info file"># File '.\sdludon_yard.rb', line 1345</span>
 
 <span class='kw'>def</span> <span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_y'>y</span> <span class='semicolon'>;</span> <span class='semicolon'>;</span> <span class='kw'>end</span></pre>
     </td>
@@ -3397,10 +3095,10 @@ mouse_sym =&gt;  :lbtn, :mbtn, :rbtn</code></pre>
       <pre class="lines">
 
 
-1354</pre>
+1340</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File '.\sdludon_yard.rb', line 1354</span>
+      <pre class="code"><span class="info file"># File '.\sdludon_yard.rb', line 1340</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_mouse_move'>mouse_move</span><span class='lparen'>(</span><span class='id identifier rubyid_x'>x</span><span class='comma'>,</span><span class='id identifier rubyid_y'>y</span><span class='rparen'>)</span> <span class='semicolon'>;</span> <span class='semicolon'>;</span> <span class='kw'>end</span></pre>
     </td>
@@ -3413,7 +3111,7 @@ mouse_sym =&gt;  :lbtn, :mbtn, :rbtn</code></pre>
 </div>
 
     <div id="footer">
-  Generated on Sun Jun 14 22:23:55 2015 by
+  Generated on Wed Jun 17 13:00:07 2015 by
   <a href="http://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.8.7.6 (ruby-2.2.2).
 </div>

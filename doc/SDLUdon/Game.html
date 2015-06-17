@@ -180,7 +180,9 @@
   
 
   
-    <span class="summary_desc"><div class='inline'></div></span>
+    <span class="summary_desc"><div class='inline'>
+<p>フルスクリーン時に表示可能な画面の解像度一覧(配列)を取得する。.</p>
+</div></span>
   
 </li>
 
@@ -820,6 +822,30 @@
         <li class="public ">
   <span class="summary_signature">
     
+      <a href="#x2-instance_method" title="#x2 (instance method)">- (Fixnum) <strong>x2</strong> </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'>
+<p>ウインドウの右端(<span class='object_link'><a href="#x-instance_method" title="SDLUdon::Game#x (method)">#x</a></span>+<span class='object_link'><a href="#width-instance_method" title="SDLUdon::Game#width (method)">#width</a></span>)座標の取得.</p>
+</div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
       <a href="#x%3D-instance_method" title="#x= (instance method)">- (Numeric) <strong>x=</strong>(val) </a>
     
 
@@ -860,6 +886,30 @@
   
     <span class="summary_desc"><div class='inline'>
 <p>ウインドウのY座標の取得.</p>
+</div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#y2-instance_method" title="#y2 (instance method)">- (Fixnum) <strong>y2</strong> </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'>
+<p>ウインドウの右端(<span class='object_link'><a href="#y-instance_method" title="SDLUdon::Game#y (method)">#y</a></span>+<span class='object_link'><a href="#height-instance_method" title="SDLUdon::Game#height (method)">#height</a></span>)座標の取得.</p>
 </div></span>
   
 </li>
@@ -924,7 +974,7 @@
   
   
   <h3 class="inherited">Methods inherited from <span class='object_link'><a href="Actor.html" title="SDLUdon::Actor (class)">Actor</a></span></h3>
-  <p class="inherited"><span class='object_link'><a href="Actor.html#active%3F-instance_method" title="SDLUdon::Actor#active? (method)">#active?</a></span>, <span class='object_link'><a href="Actor.html#deactive-instance_method" title="SDLUdon::Actor#deactive (method)">#deactive</a></span>, <span class='object_link'><a href="Actor.html#distance-instance_method" title="SDLUdon::Actor#distance (method)">#distance</a></span>, <span class='object_link'><a href="Actor.html#event-instance_method" title="SDLUdon::Actor#event (method)">#event</a></span>, <span class='object_link'><a href="Actor.html#hit-instance_method" title="SDLUdon::Actor#hit (method)">#hit</a></span>, <span class='object_link'><a href="Actor.html#hit_area-instance_method" title="SDLUdon::Actor#hit_area (method)">#hit_area</a></span>, <span class='object_link'><a href="Actor.html#load-instance_method" title="SDLUdon::Actor#load (method)">#load</a></span>, <span class='object_link'><a href="Actor.html#pause-instance_method" title="SDLUdon::Actor#pause (method)">#pause</a></span>, <span class='object_link'><a href="Actor.html#pause%3F-instance_method" title="SDLUdon::Actor#pause? (method)">#pause?</a></span>, <span class='object_link'><a href="Actor.html#resume-instance_method" title="SDLUdon::Actor#resume (method)">#resume</a></span>, <span class='object_link'><a href="Actor.html#tl-instance_method" title="SDLUdon::Actor#tl (method)">#tl</a></span>, <span class='object_link'><a href="Actor.html#update-instance_method" title="SDLUdon::Actor#update (method)">#update</a></span>, <span class='object_link'><a href="Actor.html#x2-instance_method" title="SDLUdon::Actor#x2 (method)">#x2</a></span>, <span class='object_link'><a href="Actor.html#y2-instance_method" title="SDLUdon::Actor#y2 (method)">#y2</a></span></p>
+  <p class="inherited"><span class='object_link'><a href="Actor.html#active%3F-instance_method" title="SDLUdon::Actor#active? (method)">#active?</a></span>, <span class='object_link'><a href="Actor.html#deactive-instance_method" title="SDLUdon::Actor#deactive (method)">#deactive</a></span>, <span class='object_link'><a href="Actor.html#distance-instance_method" title="SDLUdon::Actor#distance (method)">#distance</a></span>, <span class='object_link'><a href="Actor.html#event-instance_method" title="SDLUdon::Actor#event (method)">#event</a></span>, <span class='object_link'><a href="Actor.html#hit-instance_method" title="SDLUdon::Actor#hit (method)">#hit</a></span>, <span class='object_link'><a href="Actor.html#hit_area-instance_method" title="SDLUdon::Actor#hit_area (method)">#hit_area</a></span>, <span class='object_link'><a href="Actor.html#load-instance_method" title="SDLUdon::Actor#load (method)">#load</a></span>, <span class='object_link'><a href="Actor.html#pause-instance_method" title="SDLUdon::Actor#pause (method)">#pause</a></span>, <span class='object_link'><a href="Actor.html#pause%3F-instance_method" title="SDLUdon::Actor#pause? (method)">#pause?</a></span>, <span class='object_link'><a href="Actor.html#resume-instance_method" title="SDLUdon::Actor#resume (method)">#resume</a></span>, <span class='object_link'><a href="Actor.html#tl-instance_method" title="SDLUdon::Actor#tl (method)">#tl</a></span>, <span class='object_link'><a href="Actor.html#update-instance_method" title="SDLUdon::Actor#update (method)">#update</a></span></p>
 <div id="constructor_details" class="method_details_list">
   <h2>Constructor Details</h2>
   
@@ -1029,12 +1079,12 @@
       <pre class="lines">
 
 
-71
-72
-73</pre>
+69
+70
+71</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File '.\sdludon_yard.rb', line 71</span>
+      <pre class="code"><span class="info file"># File '.\sdludon_yard.rb', line 69</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_initialize'>initialize</span><span class='lparen'>(</span><span class='id identifier rubyid_opts'>opts</span> <span class='op'>=</span> <span class='lbrace'>{</span><span class='rbrace'>}</span><span class='rparen'>)</span>
 	<span class='comment'># ext c code.
@@ -1090,10 +1140,10 @@
       <pre class="lines">
 
 
-62</pre>
+60</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File '.\sdludon_yard.rb', line 62</span>
+      <pre class="code"><span class="info file"># File '.\sdludon_yard.rb', line 60</span>
 
 <span class='kw'>def</span> <span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_deactive'>deactive</span> <span class='semicolon'>;</span> <span class='semicolon'>;</span> <span class='kw'>end</span></pre>
     </td>
@@ -1113,6 +1163,8 @@
 </h3><div class="docstring">
   <div class="discussion">
     
+<p>フルスクリーン時に表示可能な画面の解像度一覧(配列)を取得する。</p>
+
 
   </div>
 </div>
@@ -1138,10 +1190,10 @@
       <pre class="lines">
 
 
-53</pre>
+51</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File '.\sdludon_yard.rb', line 53</span>
+      <pre class="code"><span class="info file"># File '.\sdludon_yard.rb', line 51</span>
 
 <span class='kw'>def</span> <span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_display_modes'>display_modes</span> <span class='semicolon'>;</span> <span class='semicolon'>;</span> <span class='kw'>end</span></pre>
     </td>
@@ -1295,16 +1347,12 @@
       <pre class="lines">
 
 
-48
-49
-50</pre>
+48</pre>
     </td>
     <td>
       <pre class="code"><span class="info file"># File '.\sdludon_yard.rb', line 48</span>
 
-<span class='kw'>def</span> <span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_loop'>loop</span><span class='lparen'>(</span><span class='id identifier rubyid_opts'>opts</span> <span class='op'>=</span> <span class='lbrace'>{</span><span class='rbrace'>}</span><span class='rparen'>)</span>
-	<span class='comment'># ext c code.
-</span><span class='kw'>end</span></pre>
+<span class='kw'>def</span> <span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_loop'>loop</span><span class='lparen'>(</span><span class='id identifier rubyid_opts'>opts</span> <span class='op'>=</span> <span class='lbrace'>{</span><span class='rbrace'>}</span><span class='rparen'>)</span> <span class='semicolon'>;</span> <span class='semicolon'>;</span> <span class='kw'>end</span></pre>
     </td>
   </tr>
 </table>
@@ -1405,10 +1453,10 @@
       <pre class="lines">
 
 
-59</pre>
+57</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File '.\sdludon_yard.rb', line 59</span>
+      <pre class="code"><span class="info file"># File '.\sdludon_yard.rb', line 57</span>
 
 <span class='kw'>def</span> <span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_message_box'>message_box</span><span class='lparen'>(</span><span class='id identifier rubyid_message'>message</span><span class='comma'>,</span> <span class='id identifier rubyid_title'>title</span><span class='op'>=</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_end'>&quot;</span></span><span class='comma'>,</span> <span class='id identifier rubyid_flag'>flag</span> <span class='op'>=</span> <span class='kw'>nil</span><span class='rparen'>)</span> <span class='semicolon'>;</span> <span class='semicolon'>;</span> <span class='kw'>end</span></pre>
     </td>
@@ -1466,10 +1514,10 @@
       <pre class="lines">
 
 
-139</pre>
+143</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File '.\sdludon_yard.rb', line 139</span>
+      <pre class="code"><span class="info file"># File '.\sdludon_yard.rb', line 143</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_focus'>focus</span> <span class='semicolon'>;</span> <span class='semicolon'>;</span> <span class='kw'>end</span></pre>
     </td>
@@ -1541,10 +1589,10 @@
       <pre class="lines">
 
 
-143</pre>
+147</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File '.\sdludon_yard.rb', line 143</span>
+      <pre class="code"><span class="info file"># File '.\sdludon_yard.rb', line 147</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_focus='>focus=</span><span class='lparen'>(</span><span class='id identifier rubyid_flag'>flag</span><span class='rparen'>)</span> <span class='semicolon'>;</span> <span class='semicolon'>;</span> <span class='kw'>end</span></pre>
     </td>
@@ -1596,10 +1644,10 @@
       <pre class="lines">
 
 
-106</pre>
+104</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File '.\sdludon_yard.rb', line 106</span>
+      <pre class="code"><span class="info file"># File '.\sdludon_yard.rb', line 104</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_fps'>fps</span> <span class='semicolon'>;</span> <span class='semicolon'>;</span> <span class='kw'>end</span></pre>
     </td>
@@ -1671,10 +1719,10 @@
       <pre class="lines">
 
 
-103</pre>
+101</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File '.\sdludon_yard.rb', line 103</span>
+      <pre class="code"><span class="info file"># File '.\sdludon_yard.rb', line 101</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_fps='>fps=</span><span class='lparen'>(</span><span class='id identifier rubyid_val'>val</span><span class='rparen'>)</span> <span class='semicolon'>;</span> <span class='semicolon'>;</span> <span class='kw'>end</span></pre>
     </td>
@@ -1746,10 +1794,10 @@
       <pre class="lines">
 
 
-92</pre>
+90</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File '.\sdludon_yard.rb', line 92</span>
+      <pre class="code"><span class="info file"># File '.\sdludon_yard.rb', line 90</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_fullscreen='>fullscreen=</span><span class='lparen'>(</span><span class='id identifier rubyid_flag'>flag</span><span class='rparen'>)</span> <span class='semicolon'>;</span> <span class='semicolon'>;</span> <span class='kw'>end</span></pre>
     </td>
@@ -1796,10 +1844,10 @@
       <pre class="lines">
 
 
-88</pre>
+86</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File '.\sdludon_yard.rb', line 88</span>
+      <pre class="code"><span class="info file"># File '.\sdludon_yard.rb', line 86</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_fullscreen?'>fullscreen?</span> <span class='semicolon'>;</span> <span class='semicolon'>;</span> <span class='kw'>end</span></pre>
     </td>
@@ -1846,10 +1894,10 @@
       <pre class="lines">
 
 
-129</pre>
+133</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File '.\sdludon_yard.rb', line 129</span>
+      <pre class="code"><span class="info file"># File '.\sdludon_yard.rb', line 133</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_height'>height</span> <span class='semicolon'>;</span> <span class='semicolon'>;</span> <span class='kw'>end</span></pre>
     </td>
@@ -1903,10 +1951,10 @@
       <pre class="lines">
 
 
-132</pre>
+136</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File '.\sdludon_yard.rb', line 132</span>
+      <pre class="code"><span class="info file"># File '.\sdludon_yard.rb', line 136</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_height='>height=</span><span class='lparen'>(</span><span class='id identifier rubyid_val'>val</span><span class='rparen'>)</span> <span class='semicolon'>;</span> <span class='semicolon'>;</span> <span class='kw'>end</span></pre>
     </td>
@@ -1953,10 +2001,10 @@
       <pre class="lines">
 
 
-158</pre>
+162</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File '.\sdludon_yard.rb', line 158</span>
+      <pre class="code"><span class="info file"># File '.\sdludon_yard.rb', line 162</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_hide'>hide</span> <span class='semicolon'>;</span> <span class='semicolon'>;</span> <span class='kw'>end</span></pre>
     </td>
@@ -2009,12 +2057,12 @@
       <pre class="lines">
 
 
-77
-78
-79</pre>
+75
+76
+77</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File '.\sdludon_yard.rb', line 77</span>
+      <pre class="code"><span class="info file"># File '.\sdludon_yard.rb', line 75</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_loop'>loop</span>
 	<span class='comment'># ext c code.
@@ -2068,10 +2116,10 @@
       <pre class="lines">
 
 
-149</pre>
+153</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File '.\sdludon_yard.rb', line 149</span>
+      <pre class="code"><span class="info file"># File '.\sdludon_yard.rb', line 153</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_mouse_hover?'>mouse_hover?</span> <span class='semicolon'>;</span> <span class='semicolon'>;</span> <span class='kw'>end</span></pre>
     </td>
@@ -2123,10 +2171,10 @@
       <pre class="lines">
 
 
-146</pre>
+150</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File '.\sdludon_yard.rb', line 146</span>
+      <pre class="code"><span class="info file"># File '.\sdludon_yard.rb', line 150</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_real_fps'>real_fps</span> <span class='semicolon'>;</span> <span class='semicolon'>;</span> <span class='kw'>end</span></pre>
     </td>
@@ -2161,10 +2209,10 @@
       <pre class="lines">
 
 
-82</pre>
+80</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File '.\sdludon_yard.rb', line 82</span>
+      <pre class="code"><span class="info file"># File '.\sdludon_yard.rb', line 80</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_run'>run</span> <span class='semicolon'>;</span> <span class='semicolon'>;</span> <span class='kw'>end</span></pre>
     </td>
@@ -2233,10 +2281,10 @@
       <pre class="lines">
 
 
-136</pre>
+140</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File '.\sdludon_yard.rb', line 136</span>
+      <pre class="code"><span class="info file"># File '.\sdludon_yard.rb', line 140</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_screen_shot'>screen_shot</span><span class='lparen'>(</span><span class='id identifier rubyid_format'>format</span><span class='op'>=</span><span class='symbol'>:png</span><span class='rparen'>)</span> <span class='semicolon'>;</span> <span class='semicolon'>;</span> <span class='kw'>end</span></pre>
     </td>
@@ -2283,10 +2331,10 @@
       <pre class="lines">
 
 
-155</pre>
+159</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File '.\sdludon_yard.rb', line 155</span>
+      <pre class="code"><span class="info file"># File '.\sdludon_yard.rb', line 159</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_show'>show</span> <span class='semicolon'>;</span> <span class='semicolon'>;</span> <span class='kw'>end</span></pre>
     </td>
@@ -2338,10 +2386,10 @@
       <pre class="lines">
 
 
-99</pre>
+97</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File '.\sdludon_yard.rb', line 99</span>
+      <pre class="code"><span class="info file"># File '.\sdludon_yard.rb', line 97</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_title'>title</span> <span class='semicolon'>;</span> <span class='semicolon'>;</span> <span class='kw'>end</span></pre>
     </td>
@@ -2413,10 +2461,10 @@
       <pre class="lines">
 
 
-96</pre>
+94</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File '.\sdludon_yard.rb', line 96</span>
+      <pre class="code"><span class="info file"># File '.\sdludon_yard.rb', line 94</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_title='>title=</span><span class='lparen'>(</span><span class='id identifier rubyid_str'>str</span><span class='rparen'>)</span> <span class='semicolon'>;</span> <span class='semicolon'>;</span> <span class='kw'>end</span></pre>
     </td>
@@ -2463,10 +2511,10 @@
       <pre class="lines">
 
 
-65</pre>
+63</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File '.\sdludon_yard.rb', line 65</span>
+      <pre class="code"><span class="info file"># File '.\sdludon_yard.rb', line 63</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_total_frame'>total_frame</span> <span class='semicolon'>;</span> <span class='semicolon'>;</span> <span class='kw'>end</span></pre>
     </td>
@@ -2518,10 +2566,10 @@
       <pre class="lines">
 
 
-152</pre>
+156</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File '.\sdludon_yard.rb', line 152</span>
+      <pre class="code"><span class="info file"># File '.\sdludon_yard.rb', line 156</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_visible?'>visible?</span> <span class='semicolon'>;</span> <span class='semicolon'>;</span> <span class='kw'>end</span></pre>
     </td>
@@ -2568,10 +2616,10 @@
       <pre class="lines">
 
 
-123</pre>
+127</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File '.\sdludon_yard.rb', line 123</span>
+      <pre class="code"><span class="info file"># File '.\sdludon_yard.rb', line 127</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_width'>width</span> <span class='semicolon'>;</span> <span class='semicolon'>;</span> <span class='kw'>end</span></pre>
     </td>
@@ -2625,10 +2673,10 @@
       <pre class="lines">
 
 
-126</pre>
+130</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File '.\sdludon_yard.rb', line 126</span>
+      <pre class="code"><span class="info file"># File '.\sdludon_yard.rb', line 130</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_width='>width=</span><span class='lparen'>(</span><span class='id identifier rubyid_val'>val</span><span class='rparen'>)</span> <span class='semicolon'>;</span> <span class='semicolon'>;</span> <span class='kw'>end</span></pre>
     </td>
@@ -2675,10 +2723,10 @@
       <pre class="lines">
 
 
-85</pre>
+83</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File '.\sdludon_yard.rb', line 85</span>
+      <pre class="code"><span class="info file"># File '.\sdludon_yard.rb', line 83</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_window_id'>window_id</span> <span class='semicolon'>;</span> <span class='semicolon'>;</span> <span class='kw'>end</span></pre>
     </td>
@@ -2730,12 +2778,62 @@
       <pre class="lines">
 
 
-109</pre>
+107</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File '.\sdludon_yard.rb', line 109</span>
+      <pre class="code"><span class="info file"># File '.\sdludon_yard.rb', line 107</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_x'>x</span> <span class='semicolon'>;</span> <span class='semicolon'>;</span> <span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="x2-instance_method">
+  
+    - (<tt>Fixnum</tt>) <strong>x2</strong> 
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    
+<p>ウインドウの右端(<span class='object_link'><a href="#x-instance_method" title="SDLUdon::Game#x (method)">#x</a></span>+<span class='object_link'><a href="#width-instance_method" title="SDLUdon::Game#width (method)">#width</a></span>)座標の取得</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  
+<p class="tag_title">Returns:</p>
+<ul class="return">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>Fixnum</tt>)</span>
+      
+      
+      
+    </li>
+  
+</ul>
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+114</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File '.\sdludon_yard.rb', line 114</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_x2'>x2</span> <span class='semicolon'>;</span> <span class='semicolon'>;</span> <span class='kw'>end</span></pre>
     </td>
   </tr>
 </table>
@@ -2805,10 +2903,10 @@
       <pre class="lines">
 
 
-113</pre>
+111</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File '.\sdludon_yard.rb', line 113</span>
+      <pre class="code"><span class="info file"># File '.\sdludon_yard.rb', line 111</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_x='>x=</span><span class='lparen'>(</span><span class='id identifier rubyid_val'>val</span><span class='rparen'>)</span> <span class='semicolon'>;</span> <span class='semicolon'>;</span> <span class='kw'>end</span></pre>
     </td>
@@ -2860,12 +2958,62 @@
       <pre class="lines">
 
 
-116</pre>
+120</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File '.\sdludon_yard.rb', line 116</span>
+      <pre class="code"><span class="info file"># File '.\sdludon_yard.rb', line 120</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_y'>y</span> <span class='semicolon'>;</span> <span class='semicolon'>;</span> <span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="y2-instance_method">
+  
+    - (<tt>Fixnum</tt>) <strong>y2</strong> 
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    
+<p>ウインドウの右端(<span class='object_link'><a href="#y-instance_method" title="SDLUdon::Game#y (method)">#y</a></span>+<span class='object_link'><a href="#height-instance_method" title="SDLUdon::Game#height (method)">#height</a></span>)座標の取得</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  
+<p class="tag_title">Returns:</p>
+<ul class="return">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>Fixnum</tt>)</span>
+      
+      
+      
+    </li>
+  
+</ul>
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+117</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File '.\sdludon_yard.rb', line 117</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_y2'>y2</span> <span class='semicolon'>;</span> <span class='semicolon'>;</span> <span class='kw'>end</span></pre>
     </td>
   </tr>
 </table>
@@ -2935,10 +3083,10 @@
       <pre class="lines">
 
 
-120</pre>
+124</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File '.\sdludon_yard.rb', line 120</span>
+      <pre class="code"><span class="info file"># File '.\sdludon_yard.rb', line 124</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_y='>y=</span><span class='lparen'>(</span><span class='id identifier rubyid_val'>val</span><span class='rparen'>)</span> <span class='semicolon'>;</span> <span class='semicolon'>;</span> <span class='kw'>end</span></pre>
     </td>
@@ -2951,7 +3099,7 @@
 </div>
 
     <div id="footer">
-  Generated on Sun Jun 14 22:23:56 2015 by
+  Generated on Wed Jun 17 13:00:08 2015 by
   <a href="http://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.8.7.6 (ruby-2.2.2).
 </div>
