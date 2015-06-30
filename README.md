@@ -15,7 +15,7 @@
   sdl_ttf 2.0 ( https://www.libsdl.org/projects/SDL_ttf/ )
 
 # Compile
-    git clone https://github.com/udonkobilly/sdl_udon.git
+    git clone https://github.com/udonkobilly/sdl_udon.git or
     https://github.com/udonkobilly/sdl_udon/archive/master.zip
      cd sdl_udon
 (gcc -MM *.c > depend)
