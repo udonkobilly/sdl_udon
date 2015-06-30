@@ -1,6 +1,7 @@
-# 2D Game Library Ruby binding for SDL
+# SDLUdon
+## 2D Game Library Ruby binding for SDL
 
-@ requirements
+# Ready
 
 
 - ruby 2.2.2-i386-mingw32 ( http://rubyinstaller.org/ )
@@ -13,9 +14,10 @@
 
   sdl_ttf 2.0 ( https://www.libsdl.org/projects/SDL_ttf/ )
 
-  
-@ compile
-
+# Compile
+    git clone https://github.com/udonkobilly/sdl_udon.git
+    https://github.com/udonkobilly/sdl_udon/archive/master.zip
+     cd sdl_udon
 (gcc -MM *.c > depend)
 
     ruby extconf.rb
