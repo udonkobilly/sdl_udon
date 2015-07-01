@@ -17,7 +17,7 @@
 # Compile
     git clone https://github.com/udonkobilly/sdl_udon.git or
     https://github.com/udonkobilly/sdl_udon/archive/master.zip
-     cd sdl_udon
+    cd sdl_udon
 (gcc -MM *.c > depend)
 
     ruby extconf.rb
