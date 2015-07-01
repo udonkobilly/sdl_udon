@@ -69,12 +69,10 @@ static BOOL HitCircleAndPolygon(double aPoints[],
     BOOL hitFlag = FALSE;
     BOOL insideHitFlag = TRUE;
     HitData childHitData;
-    int z; for(z = 0; z < bPointLen; ++z) { p("%lf\n", bPoints[z]); }
     int i = 0; for (i = 0; i < bPointLen; i+=2) {
         buffPoints[0] = bPoints[i];buffPoints[1] = bPoints[i+1];
         buffPoints[2] = bPoints[(i+2)%bPointLen];
         buffPoints[3] = bPoints[(i+3)%(bPointLen-1)];
-        p("%lf : %lf : %lf : %lf\n", buffPoints[0],  buffPoints[1], buffPoints[2], buffPoints[3]);
         if (HitCircleAndLine(aPoints, buffPoints, &childHitData)) {
             hitFlag = TRUE;
             break;
@@ -212,7 +210,6 @@ static BOOL HitLineAndPolygon(double *aPoints, int bPointLen, double * bPoints, 
             HitIncludeLineInPolygon(aPoints, buffPoints, &lower, &upper);
         }
     }
-    p("h %d : u %lf - l %lf = ul %lf\n",hitFlag, upper, lower,  upper-lower);
     return (hitFlag) || ( 1.0 >= (upper-lower) && (upper - lower) > EPS) ;
 }
 
@@ -579,7 +576,8 @@ static VALUE  area_insert(VALUE self, VALUE key_or_index, VALUE area) {
         while ( current->next ) { current = current->next; }       
         current->next = updateArea;
     }
-    return area_add(self, area);
+    area_add(self, area);
+    return area;
 }
 
 static VALUE area_clear(VALUE self) {
@@ -596,20 +594,38 @@ static VALUE area_clear(VALUE self) {
 static VALUE area_set(VALUE self, VALUE area) { area_clear(self); area_add(self, area); return self; }
 
 
-static VALUE area_active(VALUE self, VALUE key_or_index) {
+static VALUE area_active(int argc, VALUE argv[], VALUE self) {
     CollisionArea *collisionArea; Data_Get_Struct(self, CollisionArea, collisionArea);
-    CollisionArea* targetArea = SearchArea(collisionArea, key_or_index);
-    if (!targetArea) return Qnil;
-    targetArea->active = TRUE;
-    return Qnil;
+    VALUE key_or_index;
+    rb_scan_args(argc, argv, "01",&key_or_index);
+    if (NIL_P(key_or_index)) {
+        while (collisionArea) {
+            collisionArea->active = TRUE;
+            collisionArea = collisionArea->next;
+        }
+    } else {
+        CollisionArea* targetArea = SearchArea(collisionArea, key_or_index);
+        if (!targetArea) return Qnil;
+        targetArea->active = TRUE;
+    }   
+    return self;
 }
 
-static VALUE area_deactive(VALUE self, VALUE key_or_index) {
+static VALUE area_deactive(int argc, VALUE argv[], VALUE self) {
     CollisionArea *collisionArea; Data_Get_Struct(self, CollisionArea, collisionArea);
-    CollisionArea* targetArea = SearchArea(collisionArea, key_or_index);
-    if (!targetArea) return Qnil;
-    targetArea->active = FALSE;
-    return Qnil;
+    VALUE key_or_index;
+    rb_scan_args(argc, argv, "01",&key_or_index);
+    if (NIL_P(key_or_index)) {
+        while (collisionArea) {
+            collisionArea->active = FALSE;
+            collisionArea = collisionArea->next;
+        }
+    } else {
+        CollisionArea* targetArea = SearchArea(collisionArea, key_or_index);
+        if (!targetArea) return Qnil;
+        targetArea->active = FALSE;
+    }   
+    return self;
 }
 
 static VALUE area_inspect(VALUE self) {
@@ -929,7 +945,6 @@ static VALUE collision_module_hit(int argc, VALUE argv[], VALUE self ) {
     BOOL hitFlag = FALSE;
     for (i = 0; i < objALen; ++i) {
             aArray = GetCollisionTypeAndCArray(RARRAY_PTR(obj_a_ary)[i], &aType, &aArrayLen);
-            p("\n aArray[0] = %lf aArray[1] = %lf \n", aArray[0], aArray[1]); 
 
         for (j = 0; j < objBLen; ++j) {
             bArray = GetCollisionTypeAndCArray(RARRAY_PTR(obj_b_ary)[j], &bType, &bArrayLen);
@@ -1056,7 +1071,7 @@ void Init_collision(VALUE parent_module) {
     rb_define_method(area, "clear", area_clear, 0);
     rb_define_method(area, "[]", area_get, 1); 
     rb_define_method(area, "[]=", area_insert, 2);
-    rb_define_method(area, "active", area_active, 1);
-    rb_define_method(area, "deactive", area_deactive, 1);
+    rb_define_method(area, "active", area_active, -1);
+    rb_define_method(area, "deactive", area_deactive, -1);
     rb_define_method(area, "inspect", area_inspect, 0);
 }

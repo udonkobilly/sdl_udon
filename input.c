@@ -216,7 +216,7 @@ static inline BOOL ParseKeyBoardState(Uint8 *state, KeyData *keyData) {
     return TRUE;
 }
 
-inline void keyEventManager() {
+void keyEventManager() {
     const Uint8* state = SDL_GetKeyboardState(NULL);
     KeyData *keyData = inputData->key->keyData;
     int i, size = SDL_SCANCODE_KP_PERIOD - SDL_SCANCODE_A + 1;
@@ -230,7 +230,7 @@ inline void joyPadButtonUpManager(SDL_JoyButtonEvent *event) {
     data->buttonUped = TRUE;
     data->upButtonsBit = data->upButtonsBit | (1 << event->button);
 }
-inline void joyPadEventManager() {
+void joyPadEventManager() {
     Sint16 x_move, y_move;
     int i; for (i = 0; i < SDL_NumJoysticks(); ++i) {
         JoyPadData *data = mJoyPadData[i];       
