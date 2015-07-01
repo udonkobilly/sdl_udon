@@ -87,48 +87,7 @@
 <h2>Overview</h2><div class="docstring">
   <div class="discussion">
     
-<p># 数値のカウント処理に関するモジュール module Counter 	# Counter::Countクラスのインスタンスを生成して返す。
-	# @return [Count] 	def self.num ; ; end 	# (see #num) 	# numのエイリアス
-	def self.new ; ; end 	# Counter::Clockクラスのインスタンスを生成して返す。 	def self.clock
-; ; end 	# 数値のカウント操作を行い、その値を保持するクラス 	# 	#
-通常、Counter.num(new)から内部で生成されて使用されるので、 	# 	# 直接このクラスを指定して扱うような事はありません。
-	class Count 		# インスタンスの生成 		# @overload initialize 		#  @param [Numeric]
-step ステップ(増減)値、nilの場合は1 		#  @param [Numeric] init_count
-カウントされる値の初期値、nilの場合は0 		# @return [Count] 		def initialize(step = nil,
-init_count = nil) ; ; end 		# ステップ(増減)値を設定する。 		# @overload step=(value)
-		#  @param [Numeric] value ステップ値 		# @return [Numeric] 設定したステップ値 		def
-step=(value) ; ; end 		# ステップ(増減)値を取得する。 		# @overload step 		# @return
-[Numeric] ステップ値 		def step ; ; end 		# 現在の値をステップ分または任意の値分、増加させる。 		#
-@overload up(value = nil) 		#  @param [Numeric] value
-増加値、nilの場合は#step値が使われる。 		# @return [self] 		def up ; ; end 		#
-現在の値をステップ分または任意の値分、減少させる。 		# @overload down(value = nil) 		#  @param
-[Numeric] value 減少値、nilの場合は#step値が使われる。 		# @return [self] 		def down ; ;
-end 		# 保持している値を取得する 		# @return [Numeric] 		def current ; ; end 		# (see
-#down) 		# #currentのエイリアス 		def now ; ; end 		# 限界値(最小・最大)を設定する。 		#
-@overload limit=(value) 		#  @param [Range or Array] value
-最小・最大値を示した範囲または配列 		# @return [Range or Array] 設定した限界値の範囲または配列 		def
-limit=(value) ; ; end 		# 増減の限界値(最小・最大)を取得する。 		# @overload limit 		#
-@return [Range or Array] 限界値の範囲または配列 		def limit ; ; end 		# 増加の最大値を設定する。
-		# @overload max=(value) 		#  @param [Numeric] value 最大値 		# @return
-[Numeric] 設定された最大値 		def max=(value) ; ; end 		# 増加の最大値を取得する。 		# @overload
-max 		# @return [Numeric] 最大値 		def max ; ; end 		# 増加の最小値を設定する。 		#
-@overload min=(value) 		#  @param [Numeric] value 最小値 		# @return [Numeric]
-設定された最小値 		def min=(value) ; ; end 		# 増加の最小値を取得する。 		# @overload min 		#
-@return [Numeric] 最小値 		def min ; ; end 		# 現在のカウント値をリセットする。 		# @overload
-reset(init_count=nil) 		#  @param [Numeric] reset リセット後のカウントの初期値、nilであれば0。
-		# @return [self] 		def reset ; ; end 	end 	#
-ストップウォッチのように、時間基準によるカウント操作を行い、その値を保持するクラス 	# 	#
-Count同様、Counter.clockから内部で生成されて使用されるので、 	# 	# 直接このクラスを指定して扱うような事はありません。
-	class Clock &lt; Count 		# インスタンスを生成する。 		# @overload
-initialize(step=nil,init_count=nil) 		#  @param [Numeric] step
-ステップ(増減)値(ミリ秒単位)。 		# 		#   手動(#up,#down)で時間の調整を行いたい場合に使用します。 		# 
-@param [Numeric] init_count 初期(時間)値(ミリ秒単位) 		def initialize(step=nil,
-init_count=nil) ; ; end 		# 経過時間を取得する。 		# @return [Numeric]  		def current
-; ; end 		# (see #current) 		# #currentのエイリアス 		def now ; ; end 		#
-カウントを始めからやり直す。 		# @overload restart 		# @return [self] 		def restart ; ;
-end 		# カウントを一時停止する。 		# @overload pause 		# @return [self] 		def pause ; ;
-end 		# 一時停止したカウントを再開する。 		# @overload resume 		# @return [self] 		def
-resume ; ; end 	end end ゲーム中に発生する様々なイベントに関するモジュール</p>
+<p>ゲーム中に発生する様々なイベントに関するモジュール</p>
 
 
   </div>
@@ -425,10 +384,10 @@ resume ; ; end 	end end ゲーム中に発生する様々なイベントに関�
       <pre class="lines">
 
 
-129</pre>
+16</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File '.\sdludon_yard_second.rb', line 129</span>
+      <pre class="code"><span class="info file"># File '.\sdludon_yard_second.rb', line 16</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_add_timer'>add_timer</span> <span class='semicolon'>;</span> <span class='semicolon'>;</span> <span class='kw'>end</span></pre>
     </td>
@@ -477,10 +436,10 @@ resume ; ; end 	end end ゲーム中に発生する様々なイベントに関�
       <pre class="lines">
 
 
-137</pre>
+24</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File '.\sdludon_yard_second.rb', line 137</span>
+      <pre class="code"><span class="info file"># File '.\sdludon_yard_second.rb', line 24</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_clear_timer'>clear_timer</span> <span class='semicolon'>;</span> <span class='semicolon'>;</span> <span class='kw'>end</span></pre>
     </td>
@@ -545,10 +504,10 @@ resume ; ; end 	end end ゲーム中に発生する様々なイベントに関�
       <pre class="lines">
 
 
-133</pre>
+20</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File '.\sdludon_yard_second.rb', line 133</span>
+      <pre class="code"><span class="info file"># File '.\sdludon_yard_second.rb', line 20</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_delete_timer'>delete_timer</span><span class='lparen'>(</span><span class='id identifier rubyid_cron'>cron</span><span class='rparen'>)</span> <span class='semicolon'>;</span> <span class='semicolon'>;</span> <span class='kw'>end</span></pre>
     </td>
@@ -561,7 +520,7 @@ resume ; ; end 	end end ゲーム中に発生する様々なイベントに関�
 </div>
 
     <div id="footer">
-  Generated on Wed Jun 17 13:00:07 2015 by
+  Generated on Wed Jul  1 10:13:10 2015 by
   <a href="http://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.8.7.6 (ruby-2.2.2).
 </div>
