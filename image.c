@@ -1,16 +1,49 @@
 #include "sdl_udon_private.h"
 
+inline static Uint32 colorRBtoC(VALUE color) {
+    Uint8 a, r, g, b;
+    r = NUM2UINT(RARRAY_PTR(color)[0]); 
+    g = NUM2UINT(RARRAY_PTR(color)[1]); 
+    b = NUM2UINT(RARRAY_PTR(color)[2]);
+    a = ( RARRAY_LENINT(color) == 4 ? NUM2INT(RARRAY_PTR(color)[3]) : 255);    
+    return (a << 24) + (r << 16) + (g << 8) + b;
+}
+
+SDL_Texture* loadTexture(const char* filename, SDL_Renderer *ren) {
+    SDL_Texture *texture = IMG_LoadTexture(ren, filename);
+    if (texture == NULL) { SDL_LOG_ABORT(); }
+    return texture;
+}
+
+inline void renderTexture(SDL_Texture *tex, SDL_Renderer *ren, SDL_Rect *dst) { SDL_RenderCopy(ren, tex, NULL, dst); }
+
+void renderTextureRect(SDL_Texture *tex, SDL_Renderer *ren, int x, int y, int x2, int y2, int w2, int h2) {
+    SDL_Rect clip = { x2, y2, w2, h2 };
+    SDL_Rect dst = { dst.x, dst.y, clip.w, clip.h };
+    SDL_RenderCopy(ren,tex, &clip, &dst);
+}
+
+SDL_Texture* renderText(const char* text, const char* fontName, SDL_Color color, int fontSize, SDL_Renderer *ren) {
+    TTF_Font *font = TTF_OpenFont(fontName, fontSize);
+    if (font == NULL) SDL_LOG_ABORT();
+
+    SDL_Surface *surf = TTF_RenderText_Blended(font, text, color);
+    SDL_Texture *texture = SDL_CreateTextureFromSurface(ren, surf);
+    SDL_FreeSurface(surf);
+    TTF_CloseFont(font);
+    return texture;
+}
+
 SDL_Surface* TextureToSurface(SDL_Texture* texture, Uint32 * colorKey) {
     SDL_Surface* surface;
-    void *pixels; int pitch;
+    void *pixels;
+    int pitch, w, h;
     SDL_LockTexture(texture, NULL, &pixels, &pitch);
-    int w, h;
     SDL_QueryTexture(texture, NULL, NULL, &w, &h);
     uint32_t *surf_pixels = malloc(sizeof(uint32_t) * w * h);
     memcpy(surf_pixels, (uint32_t*)pixels, sizeof(uint32_t) * w * h);
     surface = SDL_CreateRGBSurfaceFrom(surf_pixels, w, h, 32, pitch,0,0,0,0);
     SDL_UnlockTexture(texture);
-
     Uint8 r, g, b, a;
     SDL_BlendMode blendMode;
     SDL_GetTextureColorMod(texture, &r, &g, &b);
@@ -34,16 +67,15 @@ SDL_Texture* CreateTexture(int width, int height, SDL_Renderer* ren) {
     return texture;
 }
 
-SDL_Texture* CreateTextureFromSurfacePixels(SDL_Surface* surface, SDL_Renderer* ren, SDL_Color * outColorKey) {
+SDL_Texture* CreateTextureFromSurface(SDL_Surface* surface, SDL_Renderer* ren, SDL_Color * outColorKey) {
     SDL_Texture* texture;
-    const SDL_PixelFormat *fmt;
     SDL_bool needAlpha;
-    Uint32 i, format;
-    fmt = surface->format;
+    Uint32 format;
+    const SDL_PixelFormat *fmt = surface->format;
     needAlpha = (fmt->Amask || SDL_GetColorKey(surface, NULL) == 0) ? SDL_TRUE : SDL_FALSE;
     SDL_RendererInfo info; SDL_GetRendererInfo(ren, &info);    
     format = info.texture_formats[0];
-    for (i = 0; i < info.num_texture_formats; ++i) {
+    for (Uint32 i = 0; i < info.num_texture_formats; ++i) {
         if (!SDL_ISPIXELFORMAT_FOURCC(info.texture_formats[i]) &&
             SDL_ISPIXELFORMAT_ALPHA(info.texture_formats[i]) == needAlpha) {
             format = info.texture_formats[i];
@@ -75,41 +107,13 @@ SDL_Texture* CreateTextureFromSurfacePixels(SDL_Surface* surface, SDL_Renderer* 
     }
     return texture;
 }
-void CreateTextureAndSetImageData(const char* filename, SDL_Renderer* ren, ImageData *image) {
+void CreateTexture_SetImage(const char* filename, SDL_Renderer* ren, ImageData *image) {
     SDL_Surface* surface = IMG_Load(filename);
     if (surface == NULL) { SDL_LOG_ABORT(); }
-    image->texture = CreateTextureFromSurfacePixels(surface, ren, &image->colorKey);
+    image->texture = CreateTextureFromSurface(surface, ren, &image->colorKey);
     SDL_FreeSurface(surface);
     SDL_QueryTexture(image->texture, NULL, NULL, &image->rect->w, &image->rect->h);
 }
-
-SDL_Texture* loadTexture(const char* filename, SDL_Renderer *ren) {
-    SDL_Texture *texture = IMG_LoadTexture(ren, filename);
-    if (texture == NULL) { SDL_LOG_ABORT(); }
-    return texture;
-}
-
-inline void renderTexture(SDL_Texture *tex, SDL_Renderer *ren, SDL_Rect *dst) { SDL_RenderCopy(ren, tex, NULL, dst); }
-
-void renderTextureRect(SDL_Texture *tex, SDL_Renderer *ren, int x, int y, int x2, int y2, int w2, int h2) {
-    SDL_Rect clip = {x2, y2, w2, h2};
-    SDL_Rect dst;
-    dst.x = x; dst.y = y; dst.w = clip.w; dst.h = clip.h;
-    SDL_RenderCopy(ren,tex, &clip, &dst);
-}
-
-SDL_Texture* renderText(const char* str, const char* fontName, SDL_Color color, int  fontSize, SDL_Renderer *ren) {
-    TTF_Font *font = TTF_OpenFont(fontName, fontSize);
-    if (font == NULL) SDL_LOG_ABORT();
-
-    SDL_Surface *surf = TTF_RenderText_Blended(font, str, color);
-    SDL_Texture *texture = SDL_CreateTextureFromSurface(ren, surf);
-    SDL_FreeSurface(surf);
-    TTF_CloseFont(font);
-    return texture;
-}
-
-
 
 
 static void image_dfree(ImageData *image)  {
@@ -125,9 +129,9 @@ static VALUE image_alloc(VALUE klass) {
     return Data_Wrap_Struct(klass, 0, image_dfree, image);
 }
 
-
 static VALUE image_initialize(int argc, VALUE argv[], VALUE self) {
-    volatile VALUE width, height, color, window_id;
+    VALUE width, height;
+    volatile VALUE color, window_id;
     SDL_Renderer* renderer;
     rb_scan_args(argc, argv, "22", &width, &height, &color, &window_id);
     if (NIL_P(window_id)) {
@@ -149,7 +153,8 @@ static VALUE image_initialize(int argc, VALUE argv[], VALUE self) {
 }
 
 static VALUE image_load(int argc, VALUE argv[], VALUE self) {
-    volatile VALUE filename, window_id;
+    VALUE filename;
+    volatile VALUE window_id;
     SDL_Renderer* renderer;
     if (rb_scan_args(argc, argv, "11", &filename, &window_id) == 1) window_id = rb_int_new(0);
     ImageData *image = NULL;
@@ -158,15 +163,15 @@ static VALUE image_load(int argc, VALUE argv[], VALUE self) {
     if (rb_funcall(ext_name, rb_intern("empty?"), 0) == Qtrue ) {
         VALUE game = rb_path2class("SDLUdon::Game");
         image_instance = rb_funcall(game, rb_intern("fetch"), 3, rb_str_new2("image"), filename, window_id);
-        if (NIL_P(image_instance)) rb_raise(rb_eLoadError, "%s", "image not found...!");
+        if (NIL_P(image_instance)) rb_raise(rb_eLoadError, "%s", "Image NotFound!");
         Data_Get_Struct(image_instance, ImageData, image);
     } else {
         renderer = NIL_P(window_id) ? systemData->renderer : GetWindowRenderer(&self, NUM2INT(window_id));
-        image_instance = rb_obj_alloc(self); 
+        image_instance = rb_obj_alloc(self);
         Data_Get_Struct(image_instance, ImageData, image);
         image->colorKey.a = 0;image->colorKey.r = 0;image->colorKey.g = 0;image->colorKey.b = 0;
         image->rect = SDL_malloc(sizeof(SDL_Rect));
-        CreateTextureAndSetImageData(StringValuePtr(filename), renderer, image);
+        CreateTexture_SetImage(StringValuePtr(filename), renderer, image);
     }
     image->rect->x = image->rect->y = 0;
     image->attach_id = NUM2INT(window_id) + 1;
@@ -174,27 +179,28 @@ static VALUE image_load(int argc, VALUE argv[], VALUE self) {
 }
 
 static VALUE image_class_text(int argc, VALUE argv[], VALUE self) {
-    VALUE text; volatile VALUE opt;
+    VALUE text; 
+    volatile VALUE opt;
     if (rb_scan_args(argc, argv, "11", &text, &opt) == 1) { opt = rb_hash_new(); }
-
-    volatile VALUE rb_x = rb_hash_lookup(opt, ID2SYM(rb_intern("x")));
+    volatile VALUE rb_x, rb_y;
+    volatile VALUE rb_color, rb_font, rb_window_id;
+    rb_x = rb_hash_lookup(opt, ID2SYM(rb_intern("x")));
     if (NIL_P(rb_x)) rb_x = rb_int_new(0);
-    volatile VALUE rb_y = rb_hash_lookup(opt, ID2SYM(rb_intern("y")));
+    rb_y = rb_hash_lookup(opt, ID2SYM(rb_intern("y")));
     if (NIL_P(rb_y)) rb_y = rb_int_new(0);
-    volatile VALUE rb_font = rb_hash_lookup(opt, ID2SYM(rb_intern("font")));
+    rb_font = rb_hash_lookup(opt, ID2SYM(rb_intern("font")));
     if (NIL_P(rb_font)) rb_font = rb_class_new_instance(2, (VALUE[]){ rb_str_new2("ＭＳ ゴシック"), rb_int_new(10) }, rb_path2class("SDLUdon::Font"));
-    volatile VALUE rb_color = rb_hash_lookup(opt, ID2SYM(rb_intern("color")));
+    rb_color = rb_hash_lookup(opt, ID2SYM(rb_intern("color")));
     if (NIL_P(rb_color)) rb_color = rb_ary_new3(3, rb_int_new(255),rb_int_new(255),rb_int_new(255));
-    volatile VALUE rb_window_id = rb_hash_lookup(opt, ID2SYM(rb_intern("window_id")));
+    rb_window_id = rb_hash_lookup(opt, ID2SYM(rb_intern("window_id")));
     if (NIL_P(rb_window_id)) rb_window_id = rb_int_new(0);
 
     VALUE rb_height = rb_funcall(rb_font, rb_intern("size"), 0);
     int cHeight = NUM2INT(rb_height);
     volatile VALUE text_ary = rb_str_split(text,"\n");
-    int text_ary_size = RARRAY_LENINT(text_ary);
-    int i, max_w = 0;
+    int max_w = 0, text_ary_size = RARRAY_LENINT(text_ary);
     
-    for (i = 0; i < text_ary_size; ++i) {
+    for (int i = 0; i < text_ary_size; ++i) {
         int w = NUM2INT(rb_funcall(rb_font, rb_intern("text_width"), 1, RARRAY_PTR(text_ary)[i]));
         if (w > max_w) max_w = w;
     }
@@ -207,6 +213,10 @@ static VALUE image_class_text(int argc, VALUE argv[], VALUE self) {
 
 static VALUE image_dispose(VALUE self) {
     ImageData *image; Data_Get_Struct(self, ImageData, image);
+    if (image->texture == NULL) {
+        rb_raise(rb_eException, "Texture was already free!");
+        return Qnil;
+    }
     SDL_DestroyTexture(image->texture);
     image->texture = NULL;
     return self;
@@ -216,16 +226,16 @@ static VALUE image_save(VALUE self, VALUE filename) {
     volatile VALUE ext_name = rb_funcall(rb_cFile, rb_intern("extname"), 1, filename);
     const char* cExtName = StringValuePtr(ext_name);
     ImageData *image;Data_Get_Struct(self, ImageData, image);
-    void *pixels; int pitch;
+    int pitch;
+    void *pixels; 
     SDL_LockTexture(image->texture, NULL, &pixels, &pitch);
-    SDL_Surface* surface = SDL_CreateRGBSurfaceFrom(pixels, image->rect->w, image->rect->h,
-        32, pitch,0,0,0,0);
+    SDL_Surface* surface = SDL_CreateRGBSurfaceFrom(pixels, 
+        image->rect->w, image->rect->h, 32, pitch,0,0,0,0);
     SDL_UnlockTexture(image->texture);
 
     int len = strlen(cExtName);
     if (len == 0) {
-        VALUE base_name = rb_funcall(rb_cFile, rb_intern("basename"), 2, filename, ext_name);
-        VALUE str = rb_str_cat2(base_name, ".png");
+        VALUE str = rb_str_cat2(filename, ".png");
         IMG_SavePNG(surface, StringValuePtr(str));
     } else if (strncmp(cExtName, ".png", len) == 0) {
         IMG_SavePNG(surface, StringValuePtr(filename));
@@ -246,7 +256,8 @@ static VALUE image_scan(VALUE self, VALUE rb_x, VALUE rb_y, VALUE rb_width, VALU
     int x = NUM2INT(rb_x); int y = NUM2INT(rb_y);
     if ((width - x) > imageData->rect->w) width = imageData->rect->w;
     if ((height - y) > imageData->rect->h) height = imageData->rect->h;
-    volatile VALUE result_image = rb_class_new_instance(3, (VALUE[]){rb_int_new(width), rb_int_new(height), Qnil, rb_int_new(imageData->attach_id) }, rb_class_of(self));
+    volatile VALUE result_image = rb_class_new_instance(3, (VALUE[]){rb_int_new(width), rb_int_new(height), Qnil,
+        rb_int_new(imageData->attach_id) }, rb_class_of(self));
     rb_funcall(result_image, rb_intern("draw"), 7, self, rb_int_new(0), rb_int_new(0),
         rb_x, rb_y, rb_width, rb_height);
     return result_image;
@@ -254,13 +265,16 @@ static VALUE image_scan(VALUE self, VALUE rb_x, VALUE rb_y, VALUE rb_width, VALU
 
 static VALUE image_scan_tiles(int argc, VALUE argv[], VALUE self) {
     ImageData* imageData; Data_Get_Struct(self, ImageData, imageData);
-    VALUE rb_cutx, rb_cuty, rb_x, rb_y;
+    VALUE rb_cutx, rb_cuty;
+    volatile VALUE rb_x, rb_y;
     rb_scan_args(argc, argv, "22", &rb_cutx, &rb_cuty, &rb_x, &rb_y);
-    if (NIL_P(rb_x)) rb_x = rb_int_new(0); if (NIL_P(rb_y)) rb_y = rb_int_new(0);
-    int cutx = NUM2INT(rb_cutx); int cuty = NUM2INT(rb_cuty);
-    int x = NUM2INT(rb_x); int y = NUM2INT(rb_y);
-    int width = (imageData->rect->w - x) / cutx; 
-    int height = (imageData->rect->h - y) / cuty;
+    if (NIL_P(rb_x)) rb_x = rb_int_new(0);
+    if (NIL_P(rb_y)) rb_y = rb_int_new(0);
+    int cutx, cuty, x, y, width, height;
+    cutx = NUM2INT(rb_cutx); cuty = NUM2INT(rb_cuty);
+    x = NUM2INT(rb_x); y = NUM2INT(rb_y);
+    width = (imageData->rect->w - x) / cutx; 
+    height = (imageData->rect->h - y) / cuty;
     volatile VALUE result_ary = rb_ary_new2(cutx * cuty);
     int i, j;
     for (i = 0; i < cuty; ++i) {
@@ -271,7 +285,6 @@ static VALUE image_scan_tiles(int argc, VALUE argv[], VALUE self) {
         }
     }
     return result_ary;
-
 }
 
 static VALUE image_draw(int argc, VALUE argv[], VALUE self) {
@@ -280,10 +293,11 @@ static VALUE image_draw(int argc, VALUE argv[], VALUE self) {
     int x = NUM2INT(rb_x), y = NUM2INT(rb_y);
     ImageData* dstData; Data_Get_Struct(self, ImageData, dstData);
     ImageData* srcData; Data_Get_Struct(image, ImageData, srcData);
-    int srcWidth = (NIL_P(rb_width)) ? srcData->rect->w : NUM2INT(rb_width); 
-    int srcHeight = (NIL_P(rb_height)) ? srcData->rect->h : NUM2INT(rb_height);
-    int srcX = (NIL_P(rb_sx)) ? 0 : NUM2INT(rb_sx);
-    int srcY = (NIL_P(rb_sy)) ? 0 : NUM2INT(rb_sy);
+    int srcWidth, srcHeight, srcX, srcY;
+    srcWidth = (NIL_P(rb_width)) ? srcData->rect->w : NUM2INT(rb_width); 
+    srcHeight = (NIL_P(rb_height)) ? srcData->rect->h : NUM2INT(rb_height);
+    srcX = (NIL_P(rb_sx)) ? 0 : NUM2INT(rb_sx);
+    srcY = (NIL_P(rb_sy)) ? 0 : NUM2INT(rb_sy);
     void *pixels, *srcPixels; 
     int pitch, srcPitch;
     SDL_LockTexture(dstData->texture, dstData->rect, &pixels, &pitch);
@@ -293,9 +307,10 @@ static VALUE image_draw(int argc, VALUE argv[], VALUE self) {
     SDL_PixelFormat *srcFmt = SDL_AllocFormat(buffPixelFormat);
     Uint32 srcColorKey = SDL_MapRGBA(srcFmt, srcData->colorKey.r, srcData->colorKey.g, srcData->colorKey.b, srcData->colorKey.a);
     SDL_FreeFormat(srcFmt);
-
     
-    int i, j, diff_w = 0, diff_h = 0; Uint32 color;
+    int diff_w = 0, diff_h = 0; 
+    Uint32 color;
+
     if (srcX + srcWidth > srcData->rect->w)
         srcWidth -= ( (srcX + srcWidth) - srcData->rect->w );
     if (srcY + srcHeight > srcData->rect->h)
@@ -307,7 +322,7 @@ static VALUE image_draw(int argc, VALUE argv[], VALUE self) {
     if (diff_w > dstData->rect->w) diff_w = dstData->rect->w; 
     if (diff_h > dstData->rect->w) diff_h = dstData->rect->h;
     if (x < 0) x = 0;if (y < 0) y = 0;
-
+    int i, j;
     for (i = y; i < diff_h; ++i) {
         for (j = x; j < diff_w; ++j) {
             color = srcBuff[(srcY + i - y) * srcData->rect->w + (srcX + j - x) ];
@@ -320,23 +335,25 @@ static VALUE image_draw(int argc, VALUE argv[], VALUE self) {
 
     return self;
 }
+
 static VALUE image_draw_copy(int argc, VALUE argv[], VALUE self) {
     VALUE image, rb_x, rb_y, rb_sx, rb_sy, rb_width, rb_height;
     rb_scan_args(argc, argv, "34", &image, &rb_x, &rb_y, &rb_sx, &rb_sy, &rb_width, &rb_height);
     int x = NUM2INT(rb_x), y = NUM2INT(rb_y);
     ImageData* dstData; Data_Get_Struct(self, ImageData, dstData);
     ImageData* srcData; Data_Get_Struct(image, ImageData, srcData);
-    int srcWidth = (NIL_P(rb_width)) ? srcData->rect->w : NUM2INT(rb_width); 
-    int srcHeight = (NIL_P(rb_height)) ? srcData->rect->h : NUM2INT(rb_height); 
-    int srcX = (NIL_P(rb_sx)) ? 0 : NUM2INT(rb_sx);
-    int srcY = (NIL_P(rb_sy)) ? 0 : NUM2INT(rb_sy);
+    int srcWidth, srcHeight, srcX, srcY;
+    srcWidth = (NIL_P(rb_width)) ? srcData->rect->w : NUM2INT(rb_width); 
+    srcHeight = (NIL_P(rb_height)) ? srcData->rect->h : NUM2INT(rb_height); 
+    srcX = (NIL_P(rb_sx)) ? 0 : NUM2INT(rb_sx);
+    srcY = (NIL_P(rb_sy)) ? 0 : NUM2INT(rb_sy);
     void *pixels, *srcPixels; 
     int pitch, srcPitch;
     SDL_LockTexture(dstData->texture, dstData->rect, &pixels, &pitch);
     SDL_LockTexture(srcData->texture, srcData->rect, &srcPixels, &srcPitch);
+    Uint32 color;
     Uint32 *buff = pixels, *srcBuff = srcPixels;
-
-    int i, j, diff_w = 0, diff_h = 0; Uint32 color;
+    int diff_w = 0, diff_h = 0; 
     if (srcX + srcWidth > srcData->rect->w) {
         srcWidth = srcWidth - ( (srcX + srcWidth) - srcData->rect->w );
     }
@@ -353,8 +370,8 @@ static VALUE image_draw_copy(int argc, VALUE argv[], VALUE self) {
     if ((diff_w - x) > srcWidth) diff_w = x + srcWidth;
 
     if (x < 0) x = 0;if (y < 0) y = 0;
-    for (i = y; i < diff_h; ++i) {
-        for (j = x; j < diff_w; ++j) {
+    for (int i = y; i < diff_h; ++i) {
+        for (int j = x; j < diff_w; ++j) {
             color = srcBuff[(srcY + i - y) * srcData->rect->w + (srcX + j - x) ];
             buff[i * srcData->rect->w + j] = color;
         }
@@ -368,18 +385,20 @@ static VALUE image_draw_point(VALUE self, VALUE x, VALUE y, VALUE color) {
     ImageData* imageData; Data_Get_Struct(self, ImageData, imageData);
     void *pixels; int pitch;
     SDL_LockTexture(imageData->texture, NULL, &pixels, &pitch);
-    Uint8 r = NUM2INT(rb_ary_entry(color, 0)); 
-    Uint8 g = NUM2INT(rb_ary_entry(color, 1)); 
-    Uint8 b= NUM2INT(rb_ary_entry(color, 2));
-    Uint8 a = ( RARRAY_LENINT(color) == 4 ? NUM2INT(rb_ary_entry(color, 3)) : 255);
+    Uint8 r, g, b, a;
+    r = NUM2INT(rb_ary_entry(color, 0)); 
+    g = NUM2INT(rb_ary_entry(color, 1)); 
+    b = NUM2INT(rb_ary_entry(color, 2));
+    a = ( RARRAY_LENINT(color) == 4 ? NUM2INT(rb_ary_entry(color, 3)) : 255);
     SDL_PixelFormat * fmt = SDL_AllocFormat(SDL_PIXELFORMAT_ARGB8888);
     Uint32 c_color = SDL_MapRGBA(fmt, r, g, b, a);
     SDL_FreeFormat(fmt);
     Uint32 *buff = pixels;
     buff[NUM2INT(y) * imageData->rect->w + NUM2INT(x)] = c_color;
     SDL_UnlockTexture(imageData->texture);
-    return Qnil;
+    return self;
 }
+
 
 
 static int adjust_draw_line_scope(VALUE self, int *p_start, int *p_end, int sx, int sy, int ex, int ey, int *p_cx, int *p_cy) {
@@ -398,7 +417,7 @@ static int adjust_draw_line_scope(VALUE self, int *p_start, int *p_end, int sx, 
         img_lim = imageData->rect->h; img_lim_other = imageData->rect->w;
         base_lim = cy; other_lim = cx;
     }
-    int i; for (i = 0 ; i < 2; ++i) {
+    for (int i = 0 ; i < 2; ++i) {
         if (i == 0) {
             p_res = p_start;
             base_co = (base_axis == 'x') ? sx : sy;
@@ -471,7 +490,6 @@ static VALUE image_draw_line(VALUE self, VALUE v_sx, VALUE v_sy, VALUE v_ex, VAL
     Uint32 c_color = SDL_MapRGBA(fmt, r, g, b, 255);
     SDL_FreeFormat(fmt);
     Uint32 *buff = pixels;
-
     for (i = start; i <= end; ++i) {
         buff[pos_y * imageData->rect->w + pos_x] = c_color;
         (*p_co1) += dn1;
@@ -495,16 +513,12 @@ static int root_i(int x) {
     int s = 1, s2 = 1;
     if (x <= 0) return 1;
     do {
-        s2 = s;  
         s = ( x / s + s)/ 2;
         s2 = s + 1;
         if (s * s <= x && x < s2 * s2) break;
     } while (1);
     return s;
 }
-
-
-
 
 struct _pointArray;
 
@@ -633,10 +647,6 @@ static inline void FillShapeScanLine(Uint32 *pixels, int x, int y, int width, in
     }
 }
 
-
-
-
-
 static VALUE image_draw_circle(VALUE self, VALUE v_cx, VALUE v_cy, VALUE v_radius, VALUE color) {
     ImageData* imageData; Data_Get_Struct(self, ImageData, imageData);
     int center_x = NUM2INT(v_cx) - 1;
@@ -667,7 +677,7 @@ static VALUE image_draw_circle(VALUE self, VALUE v_cx, VALUE v_cy, VALUE v_radiu
         end_po[num_eight].x = end_po[num_eight].y = r_root2;
     }
 
-    int li = 0; for (li = 0; li < 4; li++) {
+    for (int li = 0; li < 4; li++) {
         if (li == 0) {
             cy = center.y - ( imageData->rect->h - 1); y_sign = -1;
         }
@@ -803,11 +813,9 @@ static VALUE image_get_pixel(VALUE self, VALUE rb_x, VALUE rb_y) {
     SDL_GetRGBA(buff[imageData->rect->w*y+x] , fmt, &r, &g, &b, &a);
     SDL_FreeFormat(fmt);
     SDL_UnlockTexture(imageData->texture);
-    if (a == 255) {
-        return rb_ary_new3(3, rb_int_new(r), rb_int_new(g), rb_int_new(b));
-    } else {
-        return rb_ary_new3(4, rb_int_new(r), rb_int_new(g), rb_int_new(b), rb_int_new(a));
-    }
+
+    volatile VALUE result = rb_ary_new3(3, rb_int_new(r), rb_int_new(g), rb_int_new(b));
+    return (a == 255) ? result : rb_ary_push(result, rb_int_new(a));
 }
 
 static VALUE image_set_pixel(VALUE self, VALUE rb_x, VALUE rb_y, VALUE rb_color) {
@@ -817,10 +825,11 @@ static VALUE image_set_pixel(VALUE self, VALUE rb_x, VALUE rb_y, VALUE rb_color)
     void *pixels; int pitch;
     SDL_LockTexture(imageData->texture, NULL, &pixels, &pitch);
     Uint32* buff = pixels;
-    Uint8 r = NUM2INT(rb_ary_entry(rb_color, 0)); 
-    Uint8 g = NUM2INT(rb_ary_entry(rb_color, 1)); 
-    Uint8 b= NUM2INT(rb_ary_entry(rb_color, 2));
-    Uint8 a = ( RARRAY_LENINT(rb_color) == 4 ? NUM2INT(rb_ary_entry(rb_color, 3)) : 255);
+    Uint8 r, g, b, a;
+    r = NUM2INT(rb_ary_entry(rb_color, 0)); 
+    g = NUM2INT(rb_ary_entry(rb_color, 1)); 
+    b= NUM2INT(rb_ary_entry(rb_color, 2));
+    a = ( RARRAY_LENINT(rb_color) == 4 ? NUM2INT(rb_ary_entry(rb_color, 3)) : 255);
     SDL_PixelFormat * fmt = SDL_AllocFormat(SDL_PIXELFORMAT_ARGB8888);
     Uint32 color = SDL_MapRGBA(fmt, r, g, b, a);
     SDL_FreeFormat(fmt);
@@ -837,14 +846,9 @@ static VALUE image_draw_fill_circle(VALUE self, VALUE rb_x, VALUE rb_y, VALUE rb
     void *pixels; int pitch;
     SDL_LockTexture(imageData->texture, NULL, &pixels, &pitch);
     Uint32 *buff = pixels;
-    Uint8 r, g, b, a;
-    r = NUM2INT(RARRAY_PTR(rb_color)[0]); 
-    g = NUM2INT(RARRAY_PTR(rb_color)[1]); 
-    b = NUM2INT(RARRAY_PTR(rb_color)[2]);
-    a = ( RARRAY_LENINT(rb_color) == 4 ? NUM2INT(RARRAY_PTR(rb_color)[3]) : 255);
     Uint32 startColor, fillColor;
     startColor = buff[imageData->rect->w*y+x];
-    fillColor = (a << 24) + (r << 16) + (g << 8) + b;
+    fillColor = colorRBtoC(rb_color);
 
     FillShapeScanLine(buff, x, y, imageData->rect->w, imageData->rect->h, fillColor, startColor);
     SDL_UnlockTexture(imageData->texture);
@@ -863,7 +867,6 @@ static VALUE image_draw_box(VALUE self, VALUE x, VALUE y, VALUE w, VALUE h, VALU
 
     BOOL upDrawAble, rightDrawAble, downDrawAble, leftDrawAble;
     upDrawAble = rightDrawAble = downDrawAble = leftDrawAble = TRUE;
-
     int c_w = NUM2INT(w);int c_h = NUM2INT(h);
     if (c_w < 0) { c_x =+ c_w; c_w = abs(c_w) + c_x; }
     if (c_h < 0) { c_y =+ c_h; c_h = abs(c_h) + c_y; }
@@ -873,7 +876,8 @@ static VALUE image_draw_box(VALUE self, VALUE x, VALUE y, VALUE w, VALUE h, VALU
     if (c_y + c_h > imageData->rect->h) c_h -= (c_y + c_h) - imageData->rect->h;
 
     Uint32 *buff = pixels; Uint32 line[c_w];
-    int i; for (i = 0; i < c_w; ++i) line[i] = c_color;
+    int i; 
+    for (i = 0; i < c_w; ++i) line[i] = c_color;
     int sprite_w = imageData->rect->w;
     size_t diff = c_x + (sprite_w * c_y);
     size_t size = sizeof(uint32_t);
@@ -893,40 +897,26 @@ static VALUE image_draw_box(VALUE self, VALUE x, VALUE y, VALUE w, VALUE h, VALU
 static VALUE image_draw_fill(VALUE self, VALUE color) {
     ImageData* imageData; Data_Get_Struct(self, ImageData, imageData);
     int w = imageData->rect->w, h = imageData->rect->h;
-
+    Uint32 c_color = colorRBtoC(color);
     void *pixels; int pitch;
     SDL_LockTexture(imageData->texture, NULL, &pixels, &pitch);
-    Uint8 a, r, g, b;
-    r = NUM2UINT(RARRAY_PTR(color)[0]); 
-    g = NUM2UINT(RARRAY_PTR(color)[1]); 
-    b = NUM2UINT(RARRAY_PTR(color)[2]);
-    a = ( RARRAY_LENINT(color) == 4 ? NUM2INT(RARRAY_PTR(color)[3]) : 255);
-    
-    SDL_PixelFormat * fmt = SDL_AllocFormat(SDL_PIXELFORMAT_ARGB8888);
-    Uint32 c_color = SDL_MapRGBA(fmt, r, g, b, a);
-    SDL_FreeFormat(fmt);
     Uint32 *buff = pixels; Uint32 dst[w];
-     int i; for (i = 0; i < w; ++i) dst[i] = c_color;
+    int i; 
+    for (i = 0; i < w; ++i) dst[i] = c_color;
    
-    size_t size = sizeof(uint32_t); 
+    size_t size = sizeof(uint32_t);
     for (i = 0; i < h; ++i) memcpy(buff + i * w, dst, size * w);
     SDL_UnlockTexture(imageData->texture);
     return self;
 }
+
 static VALUE image_draw_fill_box(VALUE self, VALUE x, VALUE y, VALUE w, VALUE h, VALUE color) {
     ImageData* imageData; Data_Get_Struct(self, ImageData, imageData);
     int c_x = NUM2INT(x);int c_y = NUM2INT(y);
-    void *pixels; int pitch;
-    SDL_LockTexture(imageData->texture, NULL, &pixels, &pitch);
-    Uint8 r = NUM2INT(rb_ary_entry(color, 0)); 
-    Uint8 g = NUM2INT(rb_ary_entry(color, 1)); 
-    Uint8 b= NUM2INT(rb_ary_entry(color, 2));
-    Uint8 a = ( RARRAY_LENINT(color) == 4 ? NUM2INT(rb_ary_entry(color, 3)) : 255);
+    Uint32 c_color = colorRBtoC(color);
 
-    SDL_PixelFormat * fmt = SDL_AllocFormat(SDL_PIXELFORMAT_ARGB8888);
-    Uint32 c_color = SDL_MapRGBA(fmt, r, g, b, a);
-    SDL_FreeFormat(fmt);
-    
+    void *pixels; int pitch;
+    SDL_LockTexture(imageData->texture, NULL, &pixels, &pitch);    
     int c_w = NUM2INT(w);int c_h = NUM2INT(h);
     if (c_w < 0) { c_x =+ c_w; c_w = abs(c_w) + c_x; }
     if (c_h < 0) { c_y =+ c_h; c_h = abs(c_h) + c_y; }
@@ -938,7 +928,7 @@ static VALUE image_draw_fill_box(VALUE self, VALUE x, VALUE y, VALUE w, VALUE h,
     int i; for (i = 0; i < c_w; ++i) line[i] = c_color;
     int sprite_w = imageData->rect->w;
     size_t diff = c_x + (sprite_w * c_y);
-    size_t size = sizeof(uint32_t); 
+    size_t size = sizeof(uint32_t);
 
     for (i = 0; i < c_h; ++i) memcpy(buff + diff + i * sprite_w, line, size * c_w);
     SDL_UnlockTexture(imageData->texture);
@@ -985,7 +975,7 @@ static VALUE image_draw_text(int argc, VALUE argv[], VALUE self) {
         srcBuff = surf->pixels;
         Uint32 colorKeys[] = { srcBuff[0], srcBuff[surf->w-1], srcBuff[(surf->h-1) * surf->w], srcBuff[surf->h * surf->w - 1] };
         Uint32 colorNums[4] = { 0 }, colorNumsMax = 0;
-        for (i = 0; i < 3; ++i) { 
+        for (i = 0; i < 3; ++i) {
           for (j = i+1; j < 4; ++j) {
             if (colorKeys[i] == colorKeys[j]) { colorNums[i]++; }
           }
@@ -1048,6 +1038,7 @@ static VALUE image_get_blend(VALUE self) {
             return ID2SYM(rb_intern("unknown"));        
     }
 }
+
 static VALUE image_set_blend(VALUE self, VALUE blend) {
     ImageData* imageData; Data_Get_Struct(self, ImageData, imageData);
     volatile VALUE blend_str = rb_funcall(blend, rb_intern("to_s"), 0);
@@ -1148,13 +1139,13 @@ static VALUE image_dup(VALUE image) {
 
 static VALUE image_clear(VALUE self) {
     ImageData* imageData; Data_Get_Struct(self, ImageData, imageData);
-    void *pixels; int pitch, i;
+    void *pixels; int pitch;
     SDL_LockTexture(imageData->texture, imageData->rect, &pixels, &pitch);
     Uint32 *buff = pixels;
     SDL_PixelFormat * fmt = SDL_AllocFormat(SDL_PIXELFORMAT_ARGB8888);
     Uint32 color = SDL_MapRGBA(fmt, 0, 0, 0, 0);
     SDL_FreeFormat(fmt);
-    for (i = 0; i < imageData->rect->w * imageData->rect->h; i++) buff[i] = color;
+    for (int i = 0; i < imageData->rect->w * imageData->rect->h; i++) buff[i] = color;
     SDL_UnlockTexture(imageData->texture);
     return Qnil;
 }
@@ -1165,7 +1156,6 @@ void Init_image(VALUE parent_module) {
     rb_define_private_method(image, "initialize", image_initialize, -1);
     rb_define_singleton_method(image, "load", image_load, -1);
     rb_define_singleton_method(image, "text", image_class_text, -1);
-
     rb_define_method(image, "dispose", image_dispose, 0);
     rb_define_method(image, "save", image_save, 1);
     rb_define_method(image, "scan", image_scan, 4);

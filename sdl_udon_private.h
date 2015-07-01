@@ -254,6 +254,9 @@ ID id_draw_ex, id_draw_opts, id_iv_image;
 #define LOGFILENAME "log.txt"
 #define LOG(message)
 
+void p(const char *format, ...);
+void logger(const char* filename, const char* message, const int line, const char* srcfile);
+FILE* safeFOPEN(const char *filename, const char *mode);
 
 void SDLErrorAbortBody(BOOL loggable, const char *message);
 #define SDL_ABORT() SDLErrorAbortBody(FALSE, "")
@@ -268,7 +271,7 @@ void renderTexture(SDL_Texture *tex, SDL_Renderer *ren, SDL_Rect *dst);
 SDL_Texture* renderText(const char* str, const char* fontName, SDL_Color color, int  fontSize, SDL_Renderer *ren);
 void SetWindowCaption(const char* title);
 SDL_Surface* TextureToSurface(SDL_Texture* texture, Uint32 * colorKey);
-SDL_Texture* CreateTextureFromSurfacePixels(SDL_Surface* surface, SDL_Renderer* ren, SDL_Color *outColorKey);
+SDL_Texture* CreateTextureFromSurface(SDL_Surface* surface, SDL_Renderer* ren, SDL_Color *outColorKey);
 
 void FreeFontCache();
 void FreeSoundCache();
@@ -276,7 +279,7 @@ void SetUpSound();
 ImageData* CreateCImage(int width, int height, SDL_Renderer* ren, ImageData* image);
 void FreeCImage(ImageData *sprite);
 void Init_manager(VALUE parent_module);
-void Init_timer(VALUE parent_module);
+void Init_counter(VALUE parent_module);
 void Init_screen(VALUE parent_module);
 void Init_image(VALUE parent_module);
 void Init_collision(VALUE parent_module);

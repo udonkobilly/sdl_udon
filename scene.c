@@ -414,7 +414,7 @@ void Init_scene(VALUE parent_module) {
     rb_define_method(scene_class, "swap_child", scene_swap_child, 1);
     rb_define_method(scene_class, "temp_child", scene_temp_child, -1);
     rb_define_method(scene_class, "find_child", scene_find_child, -1);
-    rb_define_method(scene_class, "find_children", scene_find_children, -1);
+    rb_define_method(scene_class, "find_all_child", scene_find_children, -1);
     rb_define_method(scene_class, "delete_child", scene_delete_child, -1);
     rb_define_method(scene_class, "delete_child_at", scene_delete_child_at, -1);
     rb_define_method(scene_class, "clear_child", scene_clear_child, 0);

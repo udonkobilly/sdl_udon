@@ -178,7 +178,7 @@ static VALUE game_attach(VALUE self, VALUE attach_obj) {
             SDL_FreeFormat(temp_fmt);
             SDL_Surface* surface = TextureToSurface(imageData->texture, &colorCode);
             SDL_DestroyTexture(imageData->texture);
-            imageData->texture = CreateTextureFromSurfacePixels(surface, gameData->renderer, &imageData->colorKey);
+            imageData->texture = CreateTextureFromSurface(surface, gameData->renderer, &imageData->colorKey);
             SDL_FreeSurface(surface);
             imageData->attach_id = gameData->windowID;
         }
@@ -774,7 +774,7 @@ void Init_sdl_udon(void) {
     Init_screen(module_sdludon);
     Init_statemachine(module_sdludon);
     Init_manager(module_sdludon);
-    Init_timer(module_sdludon);
+    Init_counter(module_sdludon);
     Init_image(module_sdludon);
     Init_font(module_sdludon);
     Init_collision(module_sdludon);

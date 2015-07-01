@@ -310,7 +310,7 @@ static VALUE tween_get_active(VALUE self) {
 
 static VALUE tween_get_event_now(VALUE self) {
     TweenData* tweenData; Data_Get_Struct(self, TweenData, tweenData);
-    return tweenData->nowTime;
+    return rb_int_new(tweenData->nowTime);
 }
 
 

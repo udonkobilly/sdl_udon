@@ -231,7 +231,7 @@ static VALUE loader_set(int argc, VALUE argv[], VALUE self) {
 static VALUE CreateImageFromLoader(SDL_Surface * surface, int windowID) {
     SDL_Renderer* renderer = (windowID == 0) ? systemData->renderer : GetWindowRenderer(NULL, windowID);
     SDL_Color color;
-    SDL_Texture* texture = CreateTextureFromSurfacePixels(surface, renderer, &color);
+    SDL_Texture* texture = CreateTextureFromSurface(surface, renderer, &color);
     VALUE image = rb_path2class("SDLUdon::Image");
     volatile VALUE image_instance = rb_obj_alloc(image);
     ImageData *imageData;Data_Get_Struct(image_instance, ImageData, imageData);
