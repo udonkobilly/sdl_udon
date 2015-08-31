@@ -13,8 +13,6 @@ static void tween_actor_move(VALUE self, VALUE move_event_data) {
 }
 
 static VALUE tween_move_to_complete_block(VALUE val, VALUE self, int argc, VALUE argv[]) {
-
-
     tween_actor_move(self, argv[0]);
     return Qnil;
 }
@@ -33,6 +31,7 @@ static VALUE tween_move_by_enterframe_block(VALUE val, VALUE self, int argc, VAL
      tween_actor_move(self, argv[0]);
     return Qnil;
 }
+
 static VALUE timeline_move_body(VALUE dummy, VALUE param_hash, int argc, VALUE argv[]) {
     VALUE self = argv[0];
     VALUE vector = rb_hash_lookup(param_hash, ID2SYM(rb_intern("vector") ));
@@ -40,7 +39,6 @@ static VALUE timeline_move_body(VALUE dummy, VALUE param_hash, int argc, VALUE a
     VALUE duration = rb_hash_lookup(param_hash, ID2SYM(rb_intern("duration") ));
     VALUE easing = rb_hash_lookup(param_hash, ID2SYM(rb_intern("easing") ));
     VALUE move_type = rb_hash_lookup(param_hash, ID2SYM(rb_intern("move_type") ));
-
     volatile VALUE vector_ary = rb_funcall(vector, rb_intern("to_a"), 0);
     int i, len = RARRAY_LENINT(vector_ary);
     for (i = 0; i < len; ++i) {
@@ -67,7 +65,7 @@ static VALUE timeline_move_body(VALUE dummy, VALUE param_hash, int argc, VALUE a
       } else {
         volatile VALUE init_v_key = rb_str_cat2(rb_str_new2("s"), key );
         init_v = rb_hash_lookup(vector, rb_funcall(init_v_key, rb_intern("to_sym"), 0));
-        if (NIL_P(init_v)) init_v = rb_int_new(0); 
+        if (NIL_P(init_v)) init_v = rb_int_new(0); // 暫定。originを採用すればそちらを使う。
       }
       volatile VALUE v_hash = rb_hash_new();
       rb_hash_aset(tween_hash, ID2SYM(rb_intern(key)), v_hash);
@@ -78,9 +76,8 @@ static VALUE timeline_move_body(VALUE dummy, VALUE param_hash, int argc, VALUE a
         rb_hash_aset(v_hash, ID2SYM(rb_intern("goal_num")), val);
       }
     }
-
     rb_obj_call_init(tween_instance, 3, (VALUE[]) { tween_hash, duration, easing });
-    if (!NIL_P(parent)) { 
+    if (!NIL_P(parent)) {
       volatile VALUE tween_event_manager = rb_funcall(tween_instance, rb_intern("event"),0);
       
       VALUE (*complete_block_handler)(VALUE, VALUE, int, VALUE[]);
@@ -159,7 +156,6 @@ static VALUE timeline_move_to(int argc, VALUE argv[], VALUE self) {
     return timeline_move(argc, argv, self, "to");
 }
 
-
 static VALUE timeline_move_by(int argc, VALUE argv[], VALUE self) {
     return timeline_move(argc, argv, self, "by");
 }
@@ -175,10 +171,10 @@ static VALUE timeline_action(int argc, VALUE argv[], VALUE self) {
     }
   }
 
-    volatile VALUE hash = rb_hash_new();
-    rb_hash_aset(hash, ID2SYM(rb_intern("action")), proc);
-    rb_ary_push(rb_ivar_get(self, rb_intern("@pool")), hash);
-    return self;
+  volatile VALUE hash = rb_hash_new();
+  rb_hash_aset(hash, ID2SYM(rb_intern("action")), proc);
+  rb_ary_push(rb_ivar_get(self, rb_intern("@pool")), hash);
+  return self;
 }
 
 static VALUE timeline_loop(VALUE self) {
@@ -218,7 +214,7 @@ static VALUE timeline_delay(VALUE self, VALUE delay) {
 
 static VALUE timeline_alloc(VALUE klass) {
     TimeLineData *timeline = ALLOC(TimeLineData);
-    return Data_Wrap_Struct(klass, 0, -1, timeline); 
+    return Data_Wrap_Struct(klass, 0, -1, timeline);
 }
 
 static VALUE timeline_initialize(int argc, VALUE argv[], VALUE self) {
@@ -234,7 +230,6 @@ static VALUE timeline_initialize(int argc, VALUE argv[], VALUE self) {
 
     return Qnil;
 }
-
 
 static VALUE timeline_is_empty(VALUE self) {
     volatile VALUE ary = rb_ivar_get(self, id_iv_pool);
@@ -252,7 +247,7 @@ static VALUE timeline_update(VALUE self) {
         volatile VALUE current_action_data = rb_ary_entry(ary, 0);
         volatile VALUE action = rb_hash_lookup(current_action_data, ID2SYM(rb_intern("action") ));
         VALUE result = rb_funcall(action, rb_intern("call"), 1, rb_iv_get(self, "@data"));
-        if ( rb_respond_to(action, rb_intern("active?")) != 0) 
+        if ( rb_respond_to(action, rb_intern("active?")) != 0)
             result = rb_funcall(action, rb_intern("active?"), 0); 
         if ( result != Qtrue ) {
             TimeLineData *timeline; Data_Get_Struct(self, TimeLineData, timeline);
@@ -265,7 +260,6 @@ static VALUE timeline_update(VALUE self) {
             } else {
               VALUE event = rb_ivar_get(self, rb_intern("@event_manager"));
               rb_funcall(event, rb_intern("trigger"), 1, ID2SYM(rb_intern("complete")));
-
             }
         }
     }

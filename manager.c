@@ -13,9 +13,8 @@ static VALUE module_manager_store(int argc, VALUE argv[], VALUE self) {
 }
 
 static VALUE module_manager_fetch(int argc, VALUE argv[], VALUE self) {
-    volatile VALUE loader = rb_ivar_get(self, rb_intern("@_loader"));
-    volatile VALUE result = rb_funcall2(loader, rb_intern("get"), argc, argv);
-    return result;
+    VALUE loader = rb_ivar_get(self, rb_intern("@_loader"));
+    return rb_funcall2(loader, rb_intern("get"), argc, argv);
 }
 
 static VALUE module_manager_is_loaded(VALUE self) {
@@ -24,10 +23,9 @@ static VALUE module_manager_is_loaded(VALUE self) {
 }
 
 static VALUE module_manager_is_loading(VALUE self) {
-    volatile VALUE loader = rb_ivar_get(self, rb_intern("@_loader"));
+    VALUE loader = rb_ivar_get(self, rb_intern("@_loader"));
     return rb_funcall(loader, rb_intern("complete?"), 0) == Qtrue ? Qfalse : Qtrue;
 }
-
 
 static int FreeLoaderImageTable(st_data_t k, st_data_t v, st_data_t arg) {
     char* keyStr = (char*)k;
@@ -71,10 +69,7 @@ static VALUE load_proc_call(VALUE data) {
     return rb_funcall( data, rb_intern("call"), 0);
 }
 
-static VALUE rescue_load_proc_call(VALUE data) {
-    return Qnil;
-}
-
+static VALUE rescue_load_proc_call(VALUE data) { return Qnil; }
 
 
 static VALUE loader_thread_block( VALUE val, VALUE loader, int argc, VALUE argv[]) {
@@ -102,9 +97,7 @@ static VALUE loader_thread_block( VALUE val, VALUE loader, int argc, VALUE argv[
         }
         rb_mutex_unlock(mutex);
     }
-    if (!loaderData->complete) {
-        loaderData->error = TRUE;
-    }
+    if (!loaderData->complete) { loaderData->error = TRUE; }
     return Qnil;
 }
 
@@ -116,13 +109,12 @@ static VALUE loader_initialize(VALUE self) {
     st_insert(loader->table, (st_data_t)"image", (st_data_t)st_init_strtable());
     st_insert(loader->table, (st_data_t)"se", (st_data_t)st_init_strtable());
     st_insert(loader->table, (st_data_t)"bgm", (st_data_t)st_init_strtable());
-    volatile VALUE mutex = rb_cvar_get(rb_class_of(self), rb_intern("@@_mutex"));
-    volatile VALUE queue = rb_cvar_get(rb_class_of(self), rb_intern("@@_queue")); 
+    VALUE mutex = rb_cvar_get(rb_class_of(self), rb_intern("@@_mutex"));
+    VALUE queue = rb_cvar_get(rb_class_of(self), rb_intern("@@_queue")); 
     volatile VALUE thread = rb_block_call(rb_cThread, rb_intern("start"), 2, (VALUE[]){ mutex, queue }, loader_thread_block, self);
     rb_ivar_set(self, rb_intern("@_thread"), thread);
     return Qnil;
 }
-
 
 static VALUE load_image(VALUE dummy, VALUE filename, int argc, VALUE argv[]) {
     SDL_Surface* surface = IMG_Load(StringValuePtr(filename));
@@ -169,7 +161,7 @@ static void PushLoadTask(VALUE loader, VALUE access_key, VALUE filename, VALUE t
     const char* cExtName = StringValuePtr(extname);
     size_t len = strlen(cExtName);
     VALUE queue = rb_cvar_get(rb_class_of(loader), rb_intern("@@_queue")); 
-    volatile VALUE proc = Qnil;
+    volatile VALUE proc = Qundef;
     volatile VALUE type_s = rb_funcall(type, rb_intern("to_s"), 0);
     const char* cType = StringValuePtr(type_s);
     if ((strncmp(cType, "image", len) == 0)) {
@@ -192,13 +184,13 @@ static void PushLoadTask(VALUE loader, VALUE access_key, VALUE filename, VALUE t
 }
 
 static void EachPushLoader(VALUE self, VALUE ary, VALUE type) {
-    int len = RARRAY_LENINT(ary);
-    int i; for (i = 0; i < len; ++i) {
+    int len = RARRAY_LENINT(ary), valLen;
+    for (int i = 0; i < len; ++i) {
         volatile VALUE val = RARRAY_PTR(ary)[i];
         if (RB_TYPE_P(val, T_HASH)) {
             volatile VALUE val_ary = rb_funcall(val, rb_intern("to_a"), 0);
-            int valLen = RARRAY_LENINT(val_ary);
-            int j; for (j = 0; j < valLen; ++j) {
+            valLen = RARRAY_LENINT(val_ary);
+            for (int j = 0; j < valLen; ++j) {
                 volatile VALUE pair = RARRAY_PTR(val_ary)[j];
                 PushLoadTask(self, RARRAY_PTR(pair)[0], RARRAY_PTR(pair)[1], type);
             }
@@ -214,8 +206,8 @@ static VALUE loader_set(int argc, VALUE argv[], VALUE self) {
     VALUE first = rb_ary_entry(ary, 0);
     if (RB_TYPE_P(first, T_HASH)) {
         volatile VALUE first_ary = rb_funcall(first, rb_intern("to_a"), 0);
-        int i, len = RARRAY_LENINT(first_ary);
-        for (i = 0; i < len; ++i) {
+        int len = RARRAY_LENINT(first_ary);
+        for (int i = 0; i < len; ++i) {
             VALUE pair = RARRAY_PTR(first_ary)[i];
             ary = RARRAY_PTR(pair)[1];
             if (!RB_TYPE_P(ary, T_ARRAY)) ary = rb_funcall(rb_cArray, rb_intern("[]"), 1, ary);
@@ -243,11 +235,12 @@ static VALUE CreateImageFromLoader(SDL_Surface * surface, int windowID) {
     imageData->attach_id = windowID + 1;
     return image_instance;
 }
+
 static VALUE CreateMusicFromLoader(const char* name, const Uint8* buff) {
     VALUE class_music = rb_path2class("SDLUdon::Sound::Music");
     volatile VALUE music = rb_obj_alloc(class_music);
     MusicData* musicData; Data_Get_Struct(music, MusicData, musicData);
-    musicData->volume = 0.5; 
+    musicData->volume = 0.5;
     musicData->music = CreateBGMFromMEMAtCache(name, buff);
     return music;
 }
@@ -257,7 +250,7 @@ static VALUE CreateEffectFromLoader(const char* name, const Uint8* buff) {
     volatile VALUE effect = rb_obj_alloc(class_effect);
     EffectData* effectData; Data_Get_Struct(effect, EffectData, effectData);
     effectData->channel  = -1;
-    effectData->volume = 0.5; 
+    effectData->volume = 0.5;
     effectData->chunk = CreateSEFromMEMAtCache(name, buff);
     return effect;
 }
@@ -267,10 +260,10 @@ static int LoaderGetStoreHash(st_data_t k, st_data_t v, st_data_t result_hash) {
     rb_hash_aset(result_hash, ID2SYM(rb_intern(keyStr)), (VALUE)v);
     return ST_CONTINUE;
 }
+
 static VALUE loader_get(int argc, VALUE argv[], VALUE self) {
     LoaderData *loader; Data_Get_Struct(self, LoaderData, loader);
-    VALUE type, key;
-    volatile VALUE opt;
+    volatile VALUE type, key, opt;
     rb_scan_args(argc, argv, "12", &type, &key, &opt);
     if (NIL_P(opt)) opt = rb_hash_new();
     st_data_t data;
@@ -309,15 +302,11 @@ static VALUE loader_get(int argc, VALUE argv[], VALUE self) {
     return Qnil;
 }
 
-static VALUE loader_get_at(int argc, VALUE argv[], VALUE self) {
-     return loader_get(argc, argv, self);
-}
+static VALUE loader_get_at(int argc, VALUE argv[], VALUE self) { return loader_get(argc, argv, self); }
 
 static VALUE loader_is_complete(VALUE self) {
     LoaderData* loaderData;Data_Get_Struct(self, LoaderData, loaderData);
-    if (loaderData->error) {
-        rb_raise(rb_eException, "load error!");
-    }
+    if (loaderData->error) { rb_raise(rb_eException, "load error!"); }
     return loaderData->complete ? Qtrue : Qfalse;
 }
 

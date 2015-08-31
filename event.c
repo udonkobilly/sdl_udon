@@ -2,9 +2,8 @@
 
 static st_table* cronPool = NULL;
 
-
-static int CronEachUpdate(st_data_t k, st_data_t v, st_data_t arg) {
-    VALUE cron = (VALUE)v;
+static int CronEachUpdate(st_data_t key, st_data_t value, st_data_t arg) {
+    VALUE cron = (VALUE)value;
     rb_funcall(cron, rb_intern("update"), 0);
     return ST_CONTINUE;
 }
@@ -20,8 +19,8 @@ static VALUE module_event_add_timer(int argc, VALUE argv[], VALUE self) {
 }
 
 static VALUE module_event_delete_timer(VALUE self, VALUE obj_or_id) {
-    st_data_t data = Qnil;
     Uint32 key = rb_type_p(obj_or_id, T_FIXNUM) ? NUM2INT(obj_or_id) : NUM2INT(rb_obj_id(obj_or_id));
+    st_data_t data;;
     st_delete(cronPool, (st_data_t*)&key, &data);
     return data;
 }
@@ -57,7 +56,8 @@ static void cron_reset(int argc, VALUE argv[], VALUE self) {
 }
 
 static VALUE cron_initialize(int argc, VALUE argv[], VALUE self) {
-    VALUE interval, proc, loop;
+    VALUE interval, proc; 
+    volatile VALUE loop;
     if (rb_block_given_p()) {
         rb_scan_args(argc, argv, "11&", &interval, &loop, &proc);
     } else {
@@ -72,6 +72,7 @@ static VALUE cron_initialize(int argc, VALUE argv[], VALUE self) {
     cronData->counter = rb_class_new_instance(0, NULL, rb_path2class("SDLUdon::Counter::Clock"));
     return Qnil;
 }
+
 static VALUE cron_update(VALUE self) {
     CronData *cronData;Data_Get_Struct(self, CronData, cronData);
     if (cronData->paused) return Qnil;
@@ -81,9 +82,7 @@ static VALUE cron_update(VALUE self) {
     if (ticks > interval) {
         rb_funcall(cronData->counter, rb_intern("restart"), 0);  
         rb_funcall(cronData->proc, rb_intern("call"), 0);
-        if (0 > --cronData->loop_count) {
-            rb_funcall(self, rb_intern("kill"), 0);
-        }
+        if (0 > --cronData->loop_count) rb_funcall(self, rb_intern("kill"), 0);
     }
     return Qnil;
 }
@@ -106,7 +105,7 @@ static VALUE cron_restart(int argc, VALUE argv[], VALUE self) {
     return self;
 }
 
-static VALUE cron_suspend(VALUE self) { 
+static VALUE cron_suspend(VALUE self) {
     CronData *cronData;Data_Get_Struct(self, CronData, cronData);
     cronData->paused = TRUE;
     rb_funcall(cronData->counter, rb_intern("pause"), 0);
@@ -119,6 +118,7 @@ static VALUE cron_resume(VALUE self) {
     rb_funcall(cronData->counter, rb_intern("resume"), 0);
     return self;
 }
+
 static VALUE event_manager_create(int argc, VALUE argv[], VALUE self) {
     volatile VALUE event_name_sym, event_block;
     rb_scan_args(argc, argv, "2", &event_name_sym, &event_block);
@@ -146,17 +146,18 @@ static VALUE event_manager_add(int argc, VALUE argv[], VALUE self) {
     volatile VALUE event_name_or_hash, event_handler, event_block; 
     rb_scan_args(argc, argv, "11&", &event_name_or_hash, &event_handler, &event_block);
     int i, handlersLen;
+    volatile VALUE event_ary, pair, handlers;
     if (rb_type_p(event_name_or_hash, T_HASH)) {
-        volatile VALUE event_ary = rb_funcall(event_name_or_hash, rb_intern("to_a"), 0);
-         int j, eventAryLen = RARRAY_LENINT(event_ary);
-         for (i = 0; i < eventAryLen; ++i) {
-            volatile VALUE pair = RARRAY_PTR(event_ary)[i];
-            volatile VALUE handlers = rb_funcall(rb_cArray, rb_intern("[]"), 1, RARRAY_PTR(pair)[1]);
+        event_ary = rb_funcall(event_name_or_hash, rb_intern("to_a"), 0);
+        int j, eventAryLen = RARRAY_LENINT(event_ary);
+        for (i = 0; i < eventAryLen; ++i) {
+            pair = RARRAY_PTR(event_ary)[i];
+            handlers = rb_funcall(rb_cArray, rb_intern("[]"), 1, RARRAY_PTR(pair)[1]);
             handlersLen = RARRAY_LENINT(handlers);
             for (j = 0; j < handlersLen; ++j) { AddEvent(self, RARRAY_PTR(pair)[0], RARRAY_PTR(handlers)[j]); }
-         }
+        }
     } else if (!NIL_P(event_handler)) {
-        volatile VALUE handlers = rb_funcall(rb_cArray, rb_intern("[]"), 1, event_handler);
+        handlers = rb_funcall(rb_cArray, rb_intern("[]"), 1, event_handler);
         handlersLen = RARRAY_LENINT(handlers);
         for (i = 0; i < handlersLen; ++i) { AddEvent(self, event_name_or_hash, RARRAY_PTR(handlers)[i]); }
     } else {
@@ -169,7 +170,7 @@ static VALUE event_manager_add(int argc, VALUE argv[], VALUE self) {
 static VALUE event_manager_add_syntax_sugar(int argc, VALUE argv[], VALUE self) {
     VALUE event_name_sym, block;
     rb_scan_args(argc, argv, "2", &event_name_sym, &block);
-    rb_funcall_with_block(self, rb_intern("add"), 1, (VALUE[]){event_name_sym }, block);
+    rb_funcall_with_block(self, rb_intern("add"), 1, (VALUE[]){ event_name_sym }, block);
     return Qnil;
 }
 
@@ -187,12 +188,12 @@ static VALUE event_manager_delete(int argc, VALUE argv[], VALUE self) {
     rb_scan_args(argc, argv, "11", &event_name_sym, &target);
     VALUE hash = rb_ivar_get(self, rb_intern("@pool"));
     volatile VALUE ary = rb_hash_lookup(hash, event_name_sym);
-    if (ary == Qnil) return Qnil;
+    if (NIL_P(ary)) return Qnil;
     volatile VALUE delete_items = Qundef;
     if (NIL_P(target)) {
         if (rb_block_given_p()) {
-          delete_items = rb_block_call(ary, rb_intern("find_all"), 0, NULL, event_ary_find_all, target);
-          rb_block_call(ary, rb_intern("delete_if"), 0, NULL, event_ary_delete_if, target);
+            delete_items = rb_block_call(ary, rb_intern("find_all"), 0, NULL, event_ary_find_all, target);
+            rb_block_call(ary, rb_intern("delete_if"), 0, NULL, event_ary_delete_if, target);
         } else {
           delete_items = rb_ary_dup(ary);
           rb_funcall(ary, rb_intern("clear"), 0);
@@ -220,11 +221,7 @@ static VALUE event_manager_trigger(int argc, VALUE argv[], VALUE self) {
 }
 
 
-
-
-
-static VALUE event_manager_alloc(VALUE self) {
-    
+static VALUE event_manager_alloc(VALUE self) {    
     EventManagerData *eventManager = ALLOC(EventManagerData);
     return Data_Wrap_Struct(self, 0, -1, eventManager);
 }
@@ -241,16 +238,13 @@ static VALUE event_manager_clear(int argc, VALUE argv[], VALUE self) {
         rb_hash_clear(hash);
     } else {
         VALUE ary = rb_hash_lookup(hash, event_name_sym);
-        if (!NIL_P(ary)) rb_ary_clear(ary); 
+        if (!NIL_P(ary)) rb_ary_clear(ary);
     }
     return self;
 }
 
 
-
-void Quit_event() {
-    st_free_table(cronPool);
-}
+void Quit_event() { st_free_table(cronPool); }
 
 
 static VALUE event_manager_is_empty(int argc, VALUE argv[], VALUE self) {
@@ -260,8 +254,8 @@ static VALUE event_manager_is_empty(int argc, VALUE argv[], VALUE self) {
     rb_scan_args(argc, argv, "01", &event_name);
     if (NIL_P(event_name)) {
         volatile VALUE pool_ary = rb_funcall(pool, rb_intern("to_a"), 0);
-        int i, pool_aryLen = RARRAY_LENINT(pool_ary);
-        for (i = 0; i < pool_aryLen; ++i) {
+        int poolAryLen = RARRAY_LENINT(pool_ary);
+        for (int i = 0; i < poolAryLen; ++i) {
             if (rb_funcall(RARRAY_PTR(pool_ary)[i], rb_intern("any?"), 0) == Qtrue) { result = Qfalse; break; }
         }
     } else {
@@ -288,16 +282,17 @@ void Init_event(VALUE parent) {
     rb_define_method(class_cron, "restart", cron_restart, -1);
     rb_define_method(class_cron, "pause", cron_suspend, 0);
     rb_define_method(class_cron, "resume", cron_resume, 0);
+
     VALUE event_class = rb_define_class_under(module_event, "Manager", rb_cObject);
     rb_define_alloc_func(event_class, event_manager_alloc);
     rb_define_private_method(event_class, "initialize", event_manager_initialize, 0);
+    rb_define_private_method(event_class, "create", event_manager_create, -1);
+    rb_define_private_method(event_class, "key?", event_manager_is_key, 1);
     rb_define_method(event_class, "add", event_manager_add, -1);
     rb_define_method(event_class, "[]=", event_manager_add_syntax_sugar, -1);
-    rb_define_private_method(event_class, "key?", event_manager_is_key, 1);
     rb_define_method(event_class, "empty?", event_manager_is_empty, -1);
     rb_define_method(event_class, "delete", event_manager_delete, -1);
     rb_define_method(event_class, "clear", event_manager_clear, -1);
     rb_define_method(event_class, "trigger", event_manager_trigger, -1);
-    rb_define_private_method(event_class, "create", event_manager_create, -1);
     cronPool = st_init_numtable();
 }

@@ -39,6 +39,7 @@ static BOOL HitPointAndCircle(double aPoints[], double bPoints[], HitData * outH
 static double CalcInnerProduct(double vax, double vay, double vbx, double vby) { return vax * vbx + vay * vby; }
 static double CalcCrossProduct(double vax, double vay, double vbx, double vby) { return vax * vby - vay * vbx; }
 
+// from: http://marupeke296.com/COL_2D_No5_PolygonToCircle.html
 static inline BOOL HitCircleAndLine(double aPoints[], double bPoints[], HitData * outHitData) {
     double x = aPoints[0], y = aPoints[1], r = aPoints[2];
     double lx1 = bPoints[0], ly1 = bPoints[1], lx2 = bPoints[2], ly2 = bPoints[3];
@@ -69,7 +70,7 @@ static BOOL HitCircleAndPolygon(double aPoints[],
     BOOL hitFlag = FALSE;
     BOOL insideHitFlag = TRUE;
     HitData childHitData;
-    int i = 0; for (i = 0; i < bPointLen; i+=2) {
+    for (int i = 0; i < bPointLen; i+=2) {
         buffPoints[0] = bPoints[i];buffPoints[1] = bPoints[i+1];
         buffPoints[2] = bPoints[(i+2)%bPointLen];
         buffPoints[3] = bPoints[(i+3)%(bPointLen-1)];
@@ -82,6 +83,8 @@ static BOOL HitCircleAndPolygon(double aPoints[],
     }
     return (hitFlag || insideHitFlag);
 }
+
+// Thanks by http://marupeke296.com/COL_2D_No10_SegmentAndSegment.html
 static BOOL HitLineAndLine(double *aPoints, double * bPoints, HitData *outHitData) {
     double ax1 = aPoints[0], ay1 = aPoints[1];
     double ax2 = aPoints[2], ay2 = aPoints[3];
@@ -92,7 +95,7 @@ static BOOL HitLineAndLine(double *aPoints, double * bPoints, HitData *outHitDat
     double bvx = bx2 - bx1, bvy = by2 - by1;
 
     double cross_av_bv = CalcCrossProduct(avx, avy, bvx, bvy);
-    if (cross_av_bv == 0.0f) { return FALSE; } 
+    if (cross_av_bv == 0.0f) { return FALSE; } // 並行状態
 
     double vx = bx1 - ax1, vy = by1 -ay1;
 
@@ -100,6 +103,9 @@ static BOOL HitLineAndLine(double *aPoints, double * bPoints, HitData *outHitDat
     double cross_v_bv = CalcCrossProduct(vx, vy, bvx, bvy);
     double t1 = cross_v_bv / cross_av_bv;
     double t2 = cross_v_av / cross_av_bv;
+    // 内分比
+    // if (outT1) outT1 = t1;
+    // if (outT2) outT2 = t2;
     if (t1 + EPS < 0 || t1 - EPS > 1 || t2 + EPS < 0 || t2 - EPS > 1)     {
         return FALSE;
     }
@@ -113,7 +119,7 @@ static BOOL HitPointAndPolygon(double *aPoints, int bPointLen, double * bPoints,
     HitData childHitData;
     double buffPoints[4];
     double sum = 0.0f;
-    int i;for (i = 0; i < bPointLen; i+=2) {
+    for (int i = 0; i < bPointLen; i+=2) {
         buffPoints[0] = bPoints[i];buffPoints[1] = bPoints[i+1];
         buffPoints[2] = bPoints[(i+2)%bPointLen];
         buffPoints[3] = bPoints[(i+3)%bPointLen];
@@ -129,12 +135,12 @@ static BOOL HitPointAndPolygon(double *aPoints, int bPointLen, double * bPoints,
     return hitFlag || (abs(sum) > 1);
 }
 
-
 static void HitIncludeLineInPolygon(double *aPoint, double *bPoint, double *lower, double *upper) {
     double x1 = aPoint[0], y1 = aPoint[1];
     double x2 = aPoint[2], y2 = aPoint[3];
     double lx1 = bPoint[0], ly1 = bPoint[1];
     double lx2 = bPoint[2], ly2 = bPoint[3];
+
     double complex complex_pt1 =  x1 + y1 * I;
     double complex complex_pt2  = x2 + y2 * I;
     double complex complex_l1 =  lx1 + ly1 * I;
@@ -143,8 +149,10 @@ static void HitIncludeLineInPolygon(double *aPoint, double *bPoint, double *lowe
     double complex dir0 = complex_pt2 - complex_pt1; 
     double complex ofs = complex_l1 - complex_pt1;
     double complex dir1 = complex_l2 - complex_l1;
+
     double num = cimag(conj(ofs)*dir1);
     double denom = cimag(conj(dir0)*dir1);
+
     if (abs(denom) < EPS) {
         if (num < EPS) { 
             *lower = *upper = 0.0; 
@@ -161,7 +169,7 @@ static void HitIncludeLineInPolygon(double *aPoint, double *bPoint, double *lowe
 
 static inline BOOL IsLeftHandedVertex(int bPointLen, double *bPoints) {
     double result = 0.0f;
-    int i; for (i = 0; i < (bPointLen-2); i+=2) {
+    for (int i = 0; i < (bPointLen-2); i+=2) {
         double x1 = bPoints[i], y1 = bPoints[i+1];
         double x2 = bPoints[(i+2)%bPointLen];
         double y2 = bPoints[(i+3)%bPointLen];
@@ -177,15 +185,15 @@ static inline BOOL IsLeftHandedVertex(int bPointLen, double *bPoints) {
         result <= MATH_DOUBLE_PI + 0.000001f) {
         return TRUE;
     }
-        return FALSE;
+    return FALSE;
 }
 
 static void SortVertexLeftHanded(int pointLen, double points[], double outSortPoints[]) {
-        outSortPoints[0] = points[0]; outSortPoints[1] = points[1];
-        int i; for (i = 2; i <= pointLen-2; i+=2) {
-            outSortPoints[i] = points[pointLen-i];
-            outSortPoints[i+1] = points[pointLen-i+1];
-        }
+    outSortPoints[0] = points[0]; outSortPoints[1] = points[1];
+    for (int i = 2; i <= pointLen-2; i+=2) {
+        outSortPoints[i] = points[pointLen-i];
+        outSortPoints[i+1] = points[pointLen-i+1];
+    }
 }
 
 static BOOL HitLineAndPolygon(double *aPoints, int bPointLen, double * bPoints, HitData *outHitData) {
@@ -215,7 +223,6 @@ static BOOL HitLineAndPolygon(double *aPoints, int bPointLen, double * bPoints, 
 
 static BOOL HitPolygonAndPolygon(int aPointLen, double *aPoints, 
     int bPointLen, double * bPoints, HitData *outHitData) {
-    int i, j;
     double *aPointHead = aPoints, *bPointHead = bPoints;
     if (!IsLeftHandedVertex(aPointLen, aPoints)) {
         double sortAPoint[8];
@@ -232,6 +239,7 @@ static BOOL HitPolygonAndPolygon(int aPointLen, double *aPoints,
     double aLower = 0.0, aUpper = 1.0, bLower = 0.0, bUpper = 1.0;
     HitData childHitData;
     double includeLineBuff[4];
+    int i, j;
     for (i = 0; i < aPointLen; i+=2) {
         aBuffPoints[0] = aPointHead[i];aBuffPoints[1] = aPointHead[i+1];
         aBuffPoints[2] = aPointHead[(i+2)%aPointLen];
@@ -258,10 +266,10 @@ static BOOL HitPolygonAndPolygon(int aPointLen, double *aPoints,
 }
 
 static BOOL HitRectAndRect(double *aPoints, double * bPoints, HitData *outHitData) {
-    int i,j;
     double ax = aPoints[0], ay = aPoints[1], ax2 = aPoints[4], ay2 = aPoints[5];
     double bx = bPoints[0], by = bPoints[1], bx2 = bPoints[4], by2 = bPoints[5];
     BOOL hitFlag = FALSE;
+    int i,j;
     for (i = 0; i < 8; i+=2) {
         double ix = aPoints[i], iy = aPoints[i+1];
         if (bx <= ix && bx2 >= ix && by <= iy && by2 >= iy) { hitFlag = TRUE; break; }
@@ -334,7 +342,7 @@ CollisionArea* CollisionParseFromArray(VALUE ary) {
     int i, len = RARRAY_LENINT(ary);
     if (len == 0) { return NULL; }
     CollisionArea* area = malloc(sizeof(CollisionArea));
-    area->pointLen = len; 
+    area->pointLen = len;
     area->active = TRUE;
     area->key = NULL;
     area->next = area->prev = NULL;
@@ -356,6 +364,7 @@ CollisionArea* CollisionParseFromArray(VALUE ary) {
             area->type = COLLISION_AREA_RECT;
             area->pointLen = 8;
             area->points = malloc(sizeof(double) * area->pointLen);
+            // [x, y], [x2, y], [x2, y2], [x, y2]
             area->points[0] = NUM2DBL(RARRAY_PTR(ary)[0]); 
             area->points[1] = NUM2DBL(RARRAY_PTR(ary)[1]); 
             area->points[2] = NUM2DBL(RARRAY_PTR(ary)[2]); 
@@ -447,7 +456,7 @@ static VALUE area_add(VALUE self, VALUE area) {
             return self;
         }
         int len = RARRAY_LENINT(area);
-        int i; for (i = 0; i < len; ++i) {
+        for (int i = 0; i < len; ++i) {
             CollisionArea* newArea = CollisionParseFromArray(RARRAY_PTR(area)[i]);
             if (newArea == NULL) { continue; }
             current->next = newArea; newArea->prev = current;
@@ -497,7 +506,8 @@ static VALUE area_delete(VALUE self, VALUE key_or_index) {
 }
 
 static VALUE PointsToRArray(CollisionArea *area) {
-    int i; volatile VALUE result = Qundef;
+    int i; 
+    volatile VALUE result = Qundef;
     switch (area->type) {
         case COLLISION_AREA_LINE:
             result = rb_ary_new2(6);
@@ -517,7 +527,8 @@ static VALUE PointsToRArray(CollisionArea *area) {
 }
 
 static VALUE RealPointsToRArray(int x, int y, CollisionArea *area) {
-    int i; volatile VALUE result = Qundef;
+    int i; 
+    volatile VALUE result = Qundef;
     switch (area->type) {
         case COLLISION_AREA_LINE:
             result = rb_ary_new2(4);
@@ -554,6 +565,7 @@ static VALUE area_get(VALUE self, VALUE key_or_index) {
         return ary;
     }
 }
+
 static VALUE  area_insert(VALUE self, VALUE key_or_index, VALUE area) {
     CollisionArea *collisionArea; Data_Get_Struct(self, CollisionArea, collisionArea);
     
@@ -591,8 +603,8 @@ static VALUE area_clear(VALUE self) {
     collisionArea->next = NULL;
     return self;
 }
-static VALUE area_set(VALUE self, VALUE area) { area_clear(self); area_add(self, area); return self; }
 
+static VALUE area_set(VALUE self, VALUE area) { area_clear(self); area_add(self, area); return self; }
 
 static VALUE area_active(int argc, VALUE argv[], VALUE self) {
     CollisionArea *collisionArea; Data_Get_Struct(self, CollisionArea, collisionArea);
@@ -679,7 +691,6 @@ static inline double* GetCollisionTypeAndCArray(VALUE rb_ary, int* type, int *ar
             array = malloc(sizeof(double) * len);
             array[0] = NUM2DBL(RARRAY_PTR(rb_ary)[0]);
             array[1] = NUM2DBL(RARRAY_PTR(rb_ary)[1]);
-
             break;
         case 3:
             *type = COLLISION_AREA_CIRCLE;
@@ -691,6 +702,7 @@ static inline double* GetCollisionTypeAndCArray(VALUE rb_ary, int* type, int *ar
             *type = COLLISION_AREA_RECT;
             *arrayLen = 8;
             array = malloc(sizeof(double) * (*arrayLen));
+            // [x, y], [x2, y], [x2, y2], [x, y2]
             array[0] = NUM2DBL(RARRAY_PTR(rb_ary)[0]); 
             array[1] = NUM2DBL(RARRAY_PTR(rb_ary)[1]); 
             array[2] = NUM2DBL(RARRAY_PTR(rb_ary)[2]); 
@@ -734,88 +746,88 @@ static inline double* GetCollisionTypeAndCArray(VALUE rb_ary, int* type, int *ar
             }
             break;
         default:
-            P("Can't Convert Array!");
+            P("Can't convert array!");
             break;
     }
     return array;
 }
 
 static inline BOOL Hit(double *aPoints, int aPointsLen, double *bPoints, int bPointsLen, int collisionType, HitData *outHitData) {
-            BOOL hitFlag = FALSE;
-            switch ( collisionType) {
-                case (COLLISION_AREA_POINT | COLLISION_AREA_POINT):
-                    hitFlag = HitPointAndPoint(aPoints, bPoints, outHitData);
-                    break;
-                case (COLLISION_AREA_POINT | COLLISION_AREA_LINE):
-                    if (aPointsLen == 2) {
-                        hitFlag = HitPointAndLine(aPoints, bPoints, outHitData);
-                    } else {
-                        hitFlag = HitPointAndLine(bPoints, aPoints, outHitData);
-                    }
-                    break;
-                case (COLLISION_AREA_POINT | COLLISION_AREA_CIRCLE):
-                    if (aPointsLen == 2) {
-                        hitFlag = HitPointAndCircle(aPoints, bPoints, outHitData);
-                    } else {
-                        hitFlag = HitPointAndCircle(bPoints, aPoints, outHitData);
-                    }
-                    break;
-                case (COLLISION_AREA_POINT | COLLISION_AREA_TRIANGLE):
-                    if (aPointsLen == 2) {
-                        hitFlag = HitPointAndPolygon(aPoints, bPointsLen, bPoints, outHitData);
-                    } else {
-                        hitFlag = HitPointAndPolygon(bPoints, aPointsLen, aPoints, outHitData);
-                    }
-                    break;
-                case (COLLISION_AREA_POINT | COLLISION_AREA_RECT):
-                    if (aPointsLen == 2) {
-                        hitFlag = HitPointAndRect(aPoints, bPoints, outHitData);
-                    } else {
-                        hitFlag = HitPointAndRect(bPoints, aPoints, outHitData);
-                    }
-                    break;
-                case (COLLISION_AREA_LINE | COLLISION_AREA_RECT):
-                    if (aPointsLen == 4) {
-                        hitFlag = HitLineAndPolygon(aPoints, bPointsLen, bPoints, outHitData);
-                    } else {
-                        hitFlag = HitLineAndPolygon(bPoints, aPointsLen, aPoints, outHitData);
-                    }
-                    break;
-                case (COLLISION_AREA_RECT | COLLISION_AREA_RECT):
-                    hitFlag = HitRectAndRect(aPoints, bPoints, outHitData);
-                    break;
-                case (COLLISION_AREA_RECT | COLLISION_AREA_TRIANGLE):
-                    hitFlag = HitPolygonAndPolygon(aPointsLen,  aPoints, bPointsLen, bPoints, outHitData);
-                    break;
-                case (COLLISION_AREA_CIRCLE | COLLISION_AREA_CIRCLE):
-                    hitFlag = HitCircleAndCircle(aPoints, bPoints, outHitData);
-                    break;
-                case (COLLISION_AREA_CIRCLE | COLLISION_AREA_RECT):
-                    if (aPointsLen == 3) {
-                        hitFlag = HitCircleAndPolygon(aPoints, bPointsLen, bPoints, outHitData);
-                    } else {
-                        hitFlag = HitCircleAndPolygon(bPoints, aPointsLen, aPoints, outHitData);
-                    }
-                    break;
-                case (COLLISION_AREA_CIRCLE | COLLISION_AREA_LINE):
-                    if (aPointsLen == 3) {
-                        hitFlag = HitCircleAndLine(aPoints, bPoints, outHitData);
-                    } else {
-                        hitFlag = HitCircleAndLine(bPoints, aPoints, outHitData);
-                    }
-                    break;
-                case (COLLISION_AREA_LINE | COLLISION_AREA_LINE):
-                    hitFlag = HitLineAndLine(bPoints, aPoints, outHitData);
-                    break;
-                default:
-                    P("error!");
-                    break;
+    BOOL hitFlag = FALSE;
+    switch ( collisionType) {
+        case (COLLISION_AREA_POINT | COLLISION_AREA_POINT):
+            hitFlag = HitPointAndPoint(aPoints, bPoints, outHitData);
+            break;
+        case (COLLISION_AREA_POINT | COLLISION_AREA_LINE):
+            if (aPointsLen == 2) {
+                hitFlag = HitPointAndLine(aPoints, bPoints, outHitData);
+            } else {
+                hitFlag = HitPointAndLine(bPoints, aPoints, outHitData);
             }
+            break;
+        case (COLLISION_AREA_POINT | COLLISION_AREA_CIRCLE):
+            if (aPointsLen == 2) {
+                hitFlag = HitPointAndCircle(aPoints, bPoints, outHitData);
+            } else {
+                hitFlag = HitPointAndCircle(bPoints, aPoints, outHitData);
+            }
+            break;
+        case (COLLISION_AREA_POINT | COLLISION_AREA_TRIANGLE):
+            if (aPointsLen == 2) {
+                hitFlag = HitPointAndPolygon(aPoints, bPointsLen, bPoints, outHitData);
+            } else {
+                hitFlag = HitPointAndPolygon(bPoints, aPointsLen, aPoints, outHitData);
+            }
+            break;
+        case (COLLISION_AREA_POINT | COLLISION_AREA_RECT):
+            if (aPointsLen == 2) {
+                hitFlag = HitPointAndRect(aPoints, bPoints, outHitData);
+            } else {
+                hitFlag = HitPointAndRect(bPoints, aPoints, outHitData);
+            }
+            break;
+        case (COLLISION_AREA_LINE | COLLISION_AREA_RECT):
+            if (aPointsLen == 4) {
+                hitFlag = HitLineAndPolygon(aPoints, bPointsLen, bPoints, outHitData);
+            } else {
+                hitFlag = HitLineAndPolygon(bPoints, aPointsLen, aPoints, outHitData);
+            }
+            break;
+        case (COLLISION_AREA_RECT | COLLISION_AREA_RECT):
+            hitFlag = HitRectAndRect(aPoints, bPoints, outHitData);
+            break;
+        case (COLLISION_AREA_RECT | COLLISION_AREA_TRIANGLE):
+            hitFlag = HitPolygonAndPolygon(aPointsLen,  aPoints, bPointsLen, bPoints, outHitData);
+            break;
+        case (COLLISION_AREA_CIRCLE | COLLISION_AREA_CIRCLE):
+            hitFlag = HitCircleAndCircle(aPoints, bPoints, outHitData);
+            break;
+        case (COLLISION_AREA_CIRCLE | COLLISION_AREA_RECT):
+            if (aPointsLen == 3) {
+                hitFlag = HitCircleAndPolygon(aPoints, bPointsLen, bPoints, outHitData);
+            } else {
+                hitFlag = HitCircleAndPolygon(bPoints, aPointsLen, aPoints, outHitData);
+            }
+            break;
+        case (COLLISION_AREA_CIRCLE | COLLISION_AREA_LINE):
+            if (aPointsLen == 3) {
+                hitFlag = HitCircleAndLine(aPoints, bPoints, outHitData);
+            } else {
+                hitFlag = HitCircleAndLine(bPoints, aPoints, outHitData);
+            }
+            break;
+        case (COLLISION_AREA_LINE | COLLISION_AREA_LINE):
+            hitFlag = HitLineAndLine(bPoints, aPoints, outHitData);
+            break;
+        default:
+            P("error!");
+            break;
+    }
 
     return hitFlag;
 }
 
-static inline HitObjectData* HitActor(VALUE obj_a, VALUE obj_b) { 
+static inline HitObjectData* HitActor(VALUE obj_a, VALUE obj_b) { //or (*outHitObjectData) か
     double ax = NUM2DBL(rb_funcall(obj_a, rb_intern("x"), 0)), ay = NUM2DBL(rb_funcall(obj_a, rb_intern("y"), 0));
     double bx = NUM2DBL(rb_funcall(obj_b, rb_intern("x"), 0)), by = NUM2DBL(rb_funcall(obj_b, rb_intern("y"), 0));
     CollisionArea* aArea; Data_Get_Struct(rb_ivar_get(obj_a, rb_intern("@hit_area")), CollisionArea, aArea);
@@ -845,7 +857,7 @@ static inline HitObjectData* HitActor(VALUE obj_a, VALUE obj_b) {
     }
 
     if (headHitObjectData->next != NULL) {
-        return headHitObjectData; 
+        return headHitObjectData;
     } else {
         free(headHitObjectData);
         return NULL;
@@ -859,7 +871,7 @@ static inline VALUE OneSideHitObjectDataToRB(HitObjectData * headHitObjectData, 
     while (currentHitObjectData) {
         volatile VALUE self_key = rb_int_new(currentHitObjectData->selfIndex);
         volatile VALUE target_key = rb_int_new(currentHitObjectData->targetIndex);
-        volatile VALUE self_info = Qundef; 
+        volatile VALUE self_info = Qundef;
 
         if (currentHitObjectData->selfArea->key) { self_key = ID2SYM(rb_intern(currentHitObjectData->selfArea->key)); }
         if (currentHitObjectData->targetArea->key) { target_key = ID2SYM(rb_intern(currentHitObjectData->selfArea->key)); }
@@ -868,7 +880,6 @@ static inline VALUE OneSideHitObjectDataToRB(HitObjectData * headHitObjectData, 
         if (NIL_P(self_info)) {
             self_info = rb_hash_new();
             rb_hash_aset(result, self_key, self_info);
-        } else {
         }
         rb_hash_aset(self_info, target_key, rb_hash_new());
         HitObjectData *next = currentHitObjectData->next;
@@ -894,20 +905,16 @@ static VALUE HitObjectDataToRB(HitObjectData * headHitObjectData, VALUE obj_a, V
 
         self_info = rb_hash_lookup(self_hit_data , self_key);
         target_info = rb_hash_lookup(target_hit_data , target_key);
-        
 
         if (NIL_P(self_info)) {
             self_info = rb_hash_new();
             rb_hash_aset(self_hit_data, self_key, self_info);
-        } else {
         }
 
         if (NIL_P(target_info)) {
-            target_info = rb_hash_new(); 
+            target_info = rb_hash_new();
             rb_hash_aset(target_hit_data, target_key, target_info);
-        } else {
         }
-
         rb_hash_aset(self_info, target_key, rb_hash_new());
         rb_hash_aset(target_info, self_key, rb_hash_new());
 
@@ -944,8 +951,7 @@ static VALUE collision_module_hit(int argc, VALUE argv[], VALUE self ) {
     HitData hitData;
     BOOL hitFlag = FALSE;
     for (i = 0; i < objALen; ++i) {
-            aArray = GetCollisionTypeAndCArray(RARRAY_PTR(obj_a_ary)[i], &aType, &aArrayLen);
-
+        aArray = GetCollisionTypeAndCArray(RARRAY_PTR(obj_a_ary)[i], &aType, &aArrayLen);
         for (j = 0; j < objBLen; ++j) {
             bArray = GetCollisionTypeAndCArray(RARRAY_PTR(obj_b_ary)[j], &bType, &bArrayLen);
             if (Hit(aArray, aArrayLen, bArray, bArrayLen, aType | bType, &hitData)) {
@@ -965,7 +971,6 @@ static VALUE collision_module_hit_actor(int argc, VALUE argv[], VALUE self ) {
     const VALUE scene_class = rb_path2class("SDLUdon::Scene");
     BOOL obj_a_is_scene = (rb_obj_is_kind_of(obj_a, scene_class) == Qtrue);
     BOOL obj_b_is_scene = (rb_obj_is_kind_of(obj_b, scene_class) == Qtrue);
-
     if (obj_a_is_scene || obj_b_is_scene) {
         volatile VALUE self_result = rb_hash_new(), target_result = rb_hash_new();
         volatile VALUE result = rb_assoc_new(self_result, target_result);
@@ -996,7 +1001,6 @@ static VALUE collision_module_hit_actor(int argc, VALUE argv[], VALUE self ) {
             if (!obj_a_is_scene) { volatile VALUE temp = obj_a; obj_a = obj_b; obj_b = temp; }
             VALUE self_pool = rb_ivar_get(obj_a, rb_intern("@pool"));
             int selfLen = RARRAY_LENINT(self_pool);
-
             for (i = 0; i < selfLen; ++i) {
                 VALUE self_child = RARRAY_PTR(self_pool)[i];
                 volatile VALUE hit_data = CollisionHitActorImpl(self_child, obj_b, FALSE);
@@ -1007,8 +1011,7 @@ static VALUE collision_module_hit_actor(int argc, VALUE argv[], VALUE self ) {
                     rb_hash_aset(child_info, obj_b, RARRAY_PTR(hit_data)[0]);
                     rb_hash_aset(target_result, self_child, RARRAY_PTR(hit_data)[1]);
                 }
-            }
-            
+            }            
             if (!obj_a_is_scene) { result = rb_assoc_new(target_result, self_result); }
         }
 
@@ -1020,13 +1023,13 @@ static VALUE collision_module_hit_actor(int argc, VALUE argv[], VALUE self ) {
     }
     return CollisionHitActorImpl(obj_a, obj_b, TRUE);
 }
+
 static VALUE collision_hit(int argc, VALUE argv[], VALUE self) {
     VALUE target; rb_scan_args(argc, argv, "1", &target);
     HitObjectData *headHitObjectData = HitActor(self, target);
     if (headHitObjectData) { return OneSideHitObjectDataToRB(headHitObjectData, self, target); }
     return Qnil;
 }
-
 
 static VALUE collision_get_real_hit_area(VALUE self) {
     int x = NUM2INT(rb_funcall(self, rb_intern("x"), 0));
@@ -1050,6 +1053,7 @@ static VALUE collision_get_real_hit_area(VALUE self) {
     }
     return RARRAY_LENINT(result_ary) == 1 ? RARRAY_PTR(result_ary)[0] : result_ary;
 }
+
 void Init_collision(VALUE parent_module) {
     VALUE module_collision = rb_define_module_under(parent_module, "Collision");
     rb_define_module_function(module_collision, "hit", collision_module_hit, -1);
@@ -1061,7 +1065,7 @@ void Init_collision(VALUE parent_module) {
     rb_define_method(module_collision, "collidable=", collision_collidable, 1);
     rb_define_method(module_collision, "collidable?", collision_is_collied, 0);
 
-    VALUE area = rb_define_class_under(module_collision, "Area", rb_cObject); 
+    VALUE area = rb_define_class_under(module_collision, "Area", rb_cObject); // or Region
     rb_define_alloc_func(area, area_alloc);
     rb_define_private_method(area, "initialize", area_initialize, -1);
     rb_define_method(area, "add", area_add, 1); 
@@ -1069,7 +1073,7 @@ void Init_collision(VALUE parent_module) {
     rb_define_method(area, "<<", area_add_syntax_sugar, 1); 
     rb_define_method(area, "delete", area_delete, 1);
     rb_define_method(area, "clear", area_clear, 0);
-    rb_define_method(area, "[]", area_get, 1); 
+    rb_define_method(area, "[]", area_get, 1);
     rb_define_method(area, "[]=", area_insert, 2);
     rb_define_method(area, "active", area_active, -1);
     rb_define_method(area, "deactive", area_deactive, -1);

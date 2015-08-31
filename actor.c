@@ -3,7 +3,6 @@
 static volatile VALUE sym_enterframe = Qundef;
 static volatile VALUE sym_deactive = Qundef;
 
-
 static VALUE actor_decide_mouse_event(VALUE self) {
     VALUE class_input = rb_path2class("SDLUdon::Input");
     int mx = NUM2INT(rb_funcall(class_input, rb_intern("mouse_x"), 0));
@@ -81,12 +80,11 @@ static VALUE actor_update_event(VALUE self) {
     return Qnil;
 }
 
-
-
 static void actor_mark(ActorData *actor) {
     rb_gc_mark(actor->x);
     rb_gc_mark(actor->y);
 }
+
 static VALUE actor_alloc(VALUE klass) {
     ActorData *actor = ALLOC(ActorData);
     actor->x = rb_int_new(0); actor->y = rb_int_new(0);
@@ -108,9 +106,6 @@ static VALUE actor_get_height(VALUE self) {
     return rb_int_new(imageData->rect->h);
 }
 
-
-
-
 static int ParseActorOption(VALUE key, VALUE value, VALUE self) {
     volatile VALUE keystr = rb_funcall(key, rb_intern("to_s"), 0);
     const char* str = StringValuePtr(keystr); int len = strlen(str);
@@ -127,6 +122,7 @@ static int ParseActorOption(VALUE key, VALUE value, VALUE self) {
     }
     return ST_CONTINUE;
 }
+
 static VALUE actor_singleton_swap_image(VALUE self, VALUE index) {
     VALUE images = rb_ivar_get(self, rb_intern("@images"));
     int cIndex = NUM2INT(index);
@@ -134,8 +130,6 @@ static VALUE actor_singleton_swap_image(VALUE self, VALUE index) {
     if (cIndex < 0 || cIndex >= imageSize) return Qnil;
     return rb_ivar_set(self, rb_intern("@image"), rb_ary_entry(images, NUM2INT(index)));
 }
-
-
 
 static VALUE actor_initialize(int argc, VALUE argv[], VALUE self) {
     ActorData *actor; Data_Get_Struct(self, ActorData, actor);
@@ -246,7 +240,6 @@ static VALUE actor_move_add(int argc, VALUE argv[], VALUE self) {
     rb_scan_args(argc, argv, "*", &args);
     ActorData *actor; Data_Get_Struct(self, ActorData, actor);
     if (RARRAY_LENINT(args) == 0) return Qnil;
-
     if (RARRAY_LENINT(args) == 1) {
         VALUE enumlator = RARRAY_PTR(args)[0];
         if (RB_TYPE_P(enumlator, T_HASH)) {
@@ -266,7 +259,6 @@ static VALUE actor_move_add(int argc, VALUE argv[], VALUE self) {
 }
 
 
-
 static VALUE actor_update(VALUE self) {
     ActorData* actorData; Data_Get_Struct(self, ActorData, actorData);
     if (actorData->suspend) return Qnil;
@@ -276,9 +268,7 @@ static VALUE actor_update(VALUE self) {
     return self;
 }
 
-static VALUE actor_get_timeline(VALUE self) {
-    return rb_ivar_get(self, id_iv_timeline);
-}
+static VALUE actor_get_timeline(VALUE self) { return rb_ivar_get(self, id_iv_timeline); }
 
 static VALUE actor_event_manager(int argc, VALUE argv[], VALUE self) {
     VALUE opt_hash;
@@ -320,15 +310,12 @@ static VALUE actor_get_halt(VALUE self) {
     return actorData->active ? Qfalse : Qtrue;
 }
 
-
-
 static VALUE actor_deactive(VALUE self) {
     ActorData* actorData; Data_Get_Struct(self, ActorData, actorData);
     actorData->active = FALSE;
     rb_funcall(rb_ivar_get(self, id_iv_event_manager), id_trigger, 2, sym_deactive, Qnil);
     return Qnil;
 }
-
 
 static inline double CalcDistance(VALUE a, VALUE b) {
     ActorData* aData; Data_Get_Struct(a, ActorData, aData);
@@ -357,6 +344,7 @@ static VALUE actor_hit_area(int argc, VALUE argv[], VALUE self) {
 static VALUE actor_to_a(VALUE self) {
     return rb_funcall(self, rb_intern("real_hit_area"), 0); 
 }
+
 static VALUE actor_hit(int argc, VALUE argv[], VALUE self) {
     VALUE target, event_able;
     if (rb_scan_args(argc, argv, "11", &target, &event_able) == 1) { event_able = Qtrue; }
@@ -377,7 +365,7 @@ static VALUE actor_hit(int argc, VALUE argv[], VALUE self) {
         }
         if (!hitFlag) { return Qnil; }
     } else {
-        result = rb_call_super(1, argv); 
+        result = rb_call_super(1, argv);
         if (NIL_P(result)) { return Qnil; }
     }
     VALUE event = rb_ivar_get(self, rb_intern("@event_manager"));
@@ -393,7 +381,6 @@ static VALUE actor_set_collied_active(VALUE self, VALUE true_or_false) {
 }
 
 static VALUE actor_get_collied_active(VALUE self) {
-
     ActorData* actorData;Data_Get_Struct(self, ActorData, actorData);
     return actorData->collidable ? Qtrue : Qfalse;
 }
@@ -449,11 +436,15 @@ void Init_actor(VALUE parent_module) {
     VALUE actor = rb_define_class_under(parent_module, "Actor", rb_cObject);
     rb_include_module(actor, rb_path2class("SDLUdon::Collision"));
     rb_define_alloc_func(actor, actor_alloc);
-    rb_define_private_method(actor, "initialize", actor_initialize, -1);
     rb_define_singleton_method(actor, "load", actor_load, -1);
+    rb_define_private_method(actor, "initialize", actor_initialize, -1);
+    rb_define_private_method(actor, "halt?", actor_get_halt, 0);
+    rb_define_private_method(actor, "update_event", actor_update_event, 0);
+    rb_define_private_method(actor, "decide_key_event", actor_decide_key_event, 0);
+    rb_define_private_method(actor, "decide_mouse_event", actor_decide_mouse_event, 0);
+    rb_define_private_method(actor, "method_missing", actor_method_missing, -1);
     rb_define_method(actor, "deactive", actor_deactive, 0);
     rb_define_method(actor, "active?", actor_get_active, 0);
-    rb_define_private_method(actor, "halt?", actor_get_halt, 0);
     rb_define_method(actor, "collidable=", actor_set_collied_active, 1);
     rb_define_method(actor, "collidable?", actor_get_collied_active, 0);
     rb_define_method(actor, "update", actor_update, 0);
@@ -469,23 +460,18 @@ void Init_actor(VALUE parent_module) {
     rb_define_method(actor, "move_add", actor_move_add, -1);
     rb_define_method(actor, "tl", actor_get_timeline, 0);
     rb_define_method(actor, "event", actor_event_manager, -1);
-    rb_define_method(actor, "hit", actor_hit, -1); 
+    rb_define_method(actor, "hit", actor_hit, -1); // ユーザー任意
     rb_define_method(actor, "hide", actor_hide, 0);
     rb_define_method(actor, "show", actor_show, 0);
     rb_define_method(actor, "visible?", actor_is_visible, 0);
     rb_define_method(actor, "distance", actor_distance, 1);
     rb_define_method(actor, "distance_square", actor_distance_square, 1);
-    rb_define_method(actor, "hit_area", actor_hit_area, -1); 
+    rb_define_method(actor, "hit_area", actor_hit_area, -1); // module Collisionに定義すべきか？
     rb_define_method(actor, "to_a", actor_to_a, 0);
     rb_define_method(actor, "state", actor_get_state_machine, -1);
     rb_define_method(actor, "pause", actor_pause, 0);
     rb_define_method(actor, "pause?", actor_is_pause, 0);
     rb_define_method(actor, "resume", actor_resume, 0);
-    rb_define_private_method(actor, "update_event", actor_update_event, 0);
-    rb_define_private_method(actor, "decide_key_event", actor_decide_key_event, 0);
-    rb_define_private_method(actor, "decide_mouse_event", actor_decide_mouse_event, 0);
-    rb_define_private_method(actor, "method_missing", actor_method_missing, -1);
-
     rb_define_attr(actor, "image", 1, 1);
 
     sym_enterframe = ID2SYM(rb_intern("enterframe"));

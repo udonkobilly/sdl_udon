@@ -68,7 +68,6 @@ static VALUE game_get_width(VALUE self) {
     GameData* gameData; Data_Get_Struct(self, GameData, gameData);
     int w, h; 
     SDL_GetWindowSize(gameData->window, &w, &h);
-
     return rb_int_new(w);
 }
 
@@ -81,7 +80,6 @@ static VALUE game_set_width(VALUE self, VALUE width) {
     SDL_DestroyRenderer(gameData->renderer);
     gameData->renderer = SDL_CreateRenderer(gameData->window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC | SDL_RENDERER_TARGETTEXTURE);
     if (isSystemRenderer) systemData->renderer = gameData->renderer;
-
     return Qnil;
 }
 
@@ -100,7 +98,6 @@ static VALUE game_set_height(VALUE self, VALUE height) {
     SDL_DestroyRenderer(gameData->renderer);
     gameData->renderer = SDL_CreateRenderer(gameData->window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC | SDL_RENDERER_TARGETTEXTURE);
     if (isSystemRenderer) systemData->renderer = gameData->renderer;
-
     return Qnil;
 }
 
@@ -165,6 +162,7 @@ static VALUE game_alloc(VALUE klass) {
     GameData *game_info = ALLOC(GameData);
     return Data_Wrap_Struct(klass, 0, -1, game_info);
 }
+
 static VALUE game_attach(VALUE self, VALUE attach_obj) {
     GameData* gameData; Data_Get_Struct(self, GameData, gameData);
     if ( rb_obj_class(attach_obj) == rb_path2class("SDLUdon::Screen") ) {
@@ -219,13 +217,12 @@ static void game_init_option_parse(volatile VALUE game, volatile VALUE hash) {
 
     v = rb_hash_lookup(hash, ID2SYM(rb_intern("store")));
     if (!NIL_P(v)) rb_funcall(rb_path2class("SDLUdon::Game"), rb_intern("store"), 1, v);
-
 }
 
 static void CreateGameWindowAndRenderer(SDL_Window** window, SDL_Renderer** renderer) {
    if (systemData->rootGameCreated) {
         *window = SDL_CreateWindow("no title.", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
-        BASE_WINDOW_WIDTH, BASE_WINDOW_HEIGHT, SDL_WINDOW_HIDDEN); 
+        BASE_WINDOW_WIDTH, BASE_WINDOW_HEIGHT, SDL_WINDOW_HIDDEN); // SDL_WINDOWPOS_UNDEFINED
         if (*window == NULL) SDL_LOG_ABORT();
         *renderer = SDL_CreateRenderer(*window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC | SDL_RENDERER_TARGETTEXTURE);
         if (*renderer == NULL) {
@@ -245,7 +242,6 @@ static VALUE game_initialize(int argc, VALUE argv[], VALUE self) {
     volatile VALUE hash;
     if (rb_scan_args(argc, argv, "01", &hash) == 1) game_init_option_parse(self, hash);
 
-
     VALUE screen_argv[] = { game_get_width(self), game_get_height(self) };
     volatile VALUE screen = rb_class_new_instance(2, screen_argv, rb_path2class("SDLUdon::Screen"));
     rb_ivar_set(self, rb_intern("@mouse_hover"), Qfalse);
@@ -253,7 +249,7 @@ static VALUE game_initialize(int argc, VALUE argv[], VALUE self) {
 
     rb_ivar_set(self, rb_intern("@child_lock"), Qfalse);
     rb_ivar_set(self, rb_intern("@screen"), screen);
-    rb_ivar_set(self, rb_intern("@pool"), rb_ary_new()); 
+    rb_ivar_set(self, rb_intern("@pool"), rb_ary_new());
     rb_ivar_set(self, id_iv_state_machine, rb_class_new_instance(0, NULL, rb_path2class("SDLUdon::StateMachine")));
     rb_ivar_set(self, rb_intern("@event_manager"), rb_class_new_instance(0, NULL, rb_path2class("SDLUdon::Event::Manager")));
     rb_ivar_set(self, rb_intern("@timeline"), rb_class_new_instance(1, (VALUE[]) { self }, rb_path2class("SDLUdon::Timeline")));
@@ -277,7 +273,6 @@ static VALUE game_resume(VALUE self) {
     game->suspend = FALSE;
     return self;
 }
-
 
 static MultiGameApplication *multiGameApplication = NULL;
 
@@ -317,8 +312,6 @@ static void game_event_handling(VALUE self, SDL_Event *event) {
             }
     }
 }
-
-
 
 static VALUE game_run_state_add_proc(VALUE dummy, VALUE self_and_block, int argc, VALUE argv[]) {
     rb_funcall_with_block(rb_ary_entry(self_and_block, 0), rb_intern("instance_eval"), 
@@ -450,7 +443,6 @@ static VALUE game_class_get_total_frame(VALUE klass) {
     return rb_int_new(systemData->totalFrame); 
 }
 
-
 static VALUE at_exit_handler(VALUE dummy, VALUE self, int argc, VALUE argv[]) {
     GameData* gameData; Data_Get_Struct(self, GameData, gameData);
     if (!gameData->running) return Qnil;
@@ -475,8 +467,7 @@ static VALUE game_loop(VALUE self) {
     SDL_Rect dst = { 0, 0,rootScreenData->rect->w,  rootScreenData->rect->h };
     SDL_ShowWindow(gameData->window);
     Uint32 fps_delay = round(1000.0f / gameData->fps), buff_real_fps = 0;
-    BOOL renderable = TRUE; 
-
+    BOOL renderable = TRUE;
     rb_funcall_with_block(rb_mKernel, rb_intern("at_exit"), 0, NULL, rb_proc_new(at_exit_handler, self));
     
     while (gameData->active && systemData->active) {
@@ -491,7 +482,7 @@ static VALUE game_loop(VALUE self) {
         }
         SDL_SetRenderTarget(gameData->renderer, rootScreenData->texture);
         SDL_RenderClear(gameData->renderer);
-        InputManager(); 
+        InputManager();
         Update_event();
         rb_yield(self); 
         renderable = TRUE;
@@ -540,7 +531,7 @@ static VALUE game_class_get_display_modes(int argc, VALUE argv[], VALUE self) {
     int num = SDL_GetNumDisplayModes( displayIndex );
     SDL_DisplayMode mode;
     volatile VALUE result_ary = rb_ary_new();
-    int i; for (i = 0; i < num; ++i) {
+    for (int i = 0; i < num; ++i) {
         SDL_GetDisplayMode(displayIndex, num - i - 1, &mode);
         rb_ary_push(result_ary, rb_assoc_new(rb_int_new(mode.w), rb_int_new(mode.h)));        
     }
@@ -572,7 +563,7 @@ static VALUE game_class_loop(int argc, VALUE argv[], VALUE self) {
             Data_Get_Struct(rb_ary_entry(ary, ary_index), GameData, multiGameData[ary_index]);
             multiGameData[ary_index]->windowID = SDL_GetWindowID(multiGameData[ary_index]->window);
             SDL_ShowWindow(multiGameData[ary_index]->window);
-            char buff[64]; sprintf(buff, "no. %d ", ary_index); 
+            char buff[64]; sprintf(buff, "no. %d ", ary_index); // title設定が無ければ
             SDL_SetWindowTitle(multiGameData[ary_index]->window, buff);
         }
         Uint32 fps_delay = round(1000.0f / systemData->fps);
@@ -639,13 +630,13 @@ static VALUE game_class_loop(int argc, VALUE argv[], VALUE self) {
 }
 
 static VALUE game_class_message_box(int argc, VALUE argv[], VALUE self) {
-    VALUE message;
-    VALUE title = Qundef;
-    VALUE flags = Qundef;
+    VALUE message, flags;
+    volatile VALUE title;
+
     rb_scan_args(argc, argv, "12", &message, &title, &flags);
-    if (title == Qnil) title = rb_str_new2("");
+    if (NIL_P(title)) title = rb_str_new2("");
     int c_flags = SDL_MESSAGEBOX_INFORMATION;
-    if (flags == Qundef || SYM2ID(flags) == rb_intern("info") ) {
+    if (NIL_P(flags) || SYM2ID(flags) == rb_intern("info") ) {
         c_flags = SDL_MESSAGEBOX_INFORMATION;
     } else if ( SYM2ID(flags) == rb_intern("warn") ) {
         c_flags = SDL_MESSAGEBOX_WARNING;
@@ -696,7 +687,7 @@ static void SetUpSDL() {
     SetUpSDLGameController();
     systemData = malloc(sizeof(SystemData));
     systemData->window = SDL_CreateWindow("no title.", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
-    BASE_WINDOW_WIDTH, BASE_WINDOW_HEIGHT, SDL_WINDOW_HIDDEN | SDL_WINDOW_RESIZABLE); 
+    BASE_WINDOW_WIDTH, BASE_WINDOW_HEIGHT, SDL_WINDOW_HIDDEN | SDL_WINDOW_RESIZABLE); // SDL_WINDOWPOS_UNDEFINED
     if (systemData->window == NULL) SDL_LOG_ABORT();
     systemData->renderer = SDL_CreateRenderer(systemData->window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC | SDL_RENDERER_TARGETTEXTURE);
     if (systemData->renderer == NULL) {
@@ -834,7 +825,7 @@ void Init_sdl_udon(void) {
     
     rb_extend_object(class_game, rb_path2class("SDLUdon::Manager"));
     rb_funcall(class_game, rb_intern("init_manage"), 0);
-    rb_funcall(rb_cObject, rb_intern("include"), 1, module_sdludon); 
+    rb_funcall(rb_cObject, rb_intern("include"), 1, module_sdludon); // こちらでないとincludedが呼ばれないらしい
 
     id_iv_scene = rb_intern("@scene");
     id_iv_screen = rb_intern("@screen");
@@ -861,6 +852,7 @@ void Init_sdl_udon(void) {
 }
 
 
+// helper
 
 void p(const char *format, ...) {
     va_list arg;
@@ -868,7 +860,6 @@ void p(const char *format, ...) {
     vfprintf(stderr, format, arg);
     va_end(arg);
 }
-
 
 FILE* safeFOPEN(const char *filename, const char *mode) {
     FILE *fp;

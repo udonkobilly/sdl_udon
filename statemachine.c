@@ -74,6 +74,7 @@ static VALUE state_machine_add(int argc, VALUE argv[], VALUE self) {
     }
     return self;
 }
+
 static VALUE state_machine_change(int argc, VALUE argv[], VALUE self) {
     VALUE state, delay;
     rb_scan_args(argc, argv, "11", &state, &delay);
@@ -151,6 +152,7 @@ static VALUE state_machine_initialize(int argc, VALUE argv[], VALUE self) {
     rb_funcall(self, rb_intern("add"), 2, ID2SYM(rb_intern("none")), rb_proc_new(state_machine_none_proc, Qnil));
     return Qnil;
 }
+
 static VALUE state_machine_register(int argc, VALUE *argv, VALUE klass) {
     volatile VALUE parent, method_sym;
     rb_scan_args(argc, argv, "02", &parent, &method_sym);
@@ -194,5 +196,4 @@ void Init_statemachine(VALUE parent_module) {
     rb_define_method(class_state_machine, "pause", state_machine_pause, 0);
     rb_define_method(class_state_machine, "resume", state_machine_resume, 0);
     rb_define_method(class_state_machine, "call", state_machine_call, -1);
-
 }

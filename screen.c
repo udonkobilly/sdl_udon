@@ -1,9 +1,8 @@
 #include "sdl_udon_private.h"
 
-
 void screen_dfree(ScreenData *screen) {
-        SDL_free(screen->rect);
-        free(screen);
+    SDL_free(screen->rect);
+    free(screen);
 }
 
 static VALUE screen_alloc(VALUE klass) {
@@ -127,14 +126,11 @@ static VALUE screen_to_image(VALUE self) {
     void *pixels;
     int pitch, srcPitch = srcWidth * sizeof(Uint32);
     SDL_LockTexture(dstData->texture, dstData->rect, &pixels, &pitch);
-
     Uint32 *buff = pixels;
     Uint8 *srcBuff = malloc( srcWidth * srcHeight * sizeof(Uint32));
     SDL_RenderReadPixels(screenData->renderer, screenData->rect,
         SDL_PIXELFORMAT_ARGB8888, srcBuff, srcPitch);
-
     SDL_PixelFormat* format = SDL_AllocFormat(SDL_PIXELFORMAT_ARGB8888);
-
     int i, diff_w = 0, diff_h = 0; Uint32 color;
     if (srcX + srcWidth > screenData->rect->w)
         srcWidth -= ( (srcX + srcWidth) - screenData->rect->w );
@@ -166,7 +162,6 @@ static VALUE screen_draw_line(VALUE self, VALUE x, VALUE y, VALUE x2, VALUE y2) 
         NUM2INT(x), NUM2INT(y), NUM2INT(x2), NUM2INT(y2));
     return self;
 }
-
 
 static VALUE screen_draw_lines(int argc, VALUE argv[], VALUE self) {
     VALUE ary;
@@ -200,7 +195,7 @@ static VALUE screen_draw_lines(int argc, VALUE argv[], VALUE self) {
 static VALUE screen_get_pixel(VALUE self, VALUE x, VALUE y) {
     ScreenData *screen; Data_Get_Struct(self, ScreenData, screen);
     SDL_Rect rect;
-    rect.x = 0; rect.y = 0;
+    rect.x = rect.y = 0;
     rect.w = screen->rect->w; rect.h = screen->rect->w;
     uint32_t *pixels = malloc(sizeof(uint32_t) * rect.w * rect.h);
     SDL_SetRenderTarget(screen->renderer, NULL);
@@ -378,9 +373,9 @@ static VALUE screen_draw_ex(int argc, VALUE argv[],VALUE self) {
         const char* flipStr = rb_id2name(SYM2ID(v_flip));
         size_t str_length = strlen(flipStr);
         if (strncmp(flipStr, "horizontal", str_length) == 0) {
-            flip = SDL_FLIP_HORIZONTAL; 
+            flip = SDL_FLIP_HORIZONTAL;
         } else if (strncmp(flipStr, "vertical", str_length) == 0) {
-            flip = SDL_FLIP_VERTICAL; 
+            flip = SDL_FLIP_VERTICAL;
         }
     }
     SDL_RenderSetScale(screen->renderer, scale_x, scale_y);
@@ -406,8 +401,6 @@ static VALUE screen_draw_actor(VALUE self, VALUE actor) {
     return Qnil;
 }
 
-
-
 static VALUE screen_draw_tiles(int argc, VALUE argv[], VALUE self) {
     VALUE images, map_ary, dst_x, dst_y, option;
     
@@ -415,7 +408,6 @@ static VALUE screen_draw_tiles(int argc, VALUE argv[], VALUE self) {
     int cDstX = (NIL_P(dst_x)) ? 0 : NUM2INT(dst_x); 
     int cDstY = (NIL_P(dst_y)) ? 0 : NUM2INT(dst_y);
     int x, y,cSrcX = 0, cSrcY = 0, cWidth = 0, cHeight = 0;
-
     int cDiffX = 0, cDiffY = 0;
     if (!NIL_P(option)) {
         VALUE src_x = rb_hash_lookup(option, ID2SYM(rb_intern("src_x")));
@@ -438,10 +430,12 @@ static VALUE screen_draw_tiles(int argc, VALUE argv[], VALUE self) {
     VALUE* p_images = RARRAY_PTR(images);
     int tileWidth = NUM2INT(rb_funcall(p_images[0], rb_intern("width"), 0));
     int tileHeight = NUM2INT(rb_funcall(p_images[0], rb_intern("height"), 0));
+
     if (cDiffX != 0) cWidth++;
     if (cDiffY != 0) cHeight++;
     if (cDiffX < 0) { cDiffX+=tileWidth; cSrcX--; }
     if (cDiffY < 0) { cDiffY+=tileHeight; cSrcY--; }
+
     for (y = 0; y < cHeight; ++y) {
         VALUE* map_line = RARRAY_PTR(RARRAY_PTR(map_ary)[y + cSrcY]);
         for (x = 0; x < cWidth; ++x) {
@@ -449,8 +443,6 @@ static VALUE screen_draw_tiles(int argc, VALUE argv[], VALUE self) {
                 rb_int_new(cDstX+x*tileWidth-cDiffX), rb_int_new(cDstY+y*tileHeight-cDiffY) );
         }
     }
-
-
     return Qnil;
 }
 
@@ -566,7 +558,10 @@ static double round_d(double x)
     }
 }
 
-
+// H = 0..360 , S = 0..100 , L = 0..100 / Color.hsl(360, 100, 100)
+// Thanks by
+// - http://www.peko-step.com/tool/hslrgb.html
+// - http://dobon.net/vb/dotnet/graphics/hsv.html
 static VALUE module_color_hsl(int argc, VALUE argv[], VALUE self) {
     VALUE rb_h, rb_s, rb_l, rb_a, rb_ary;
     rb_scan_args(argc, argv, "13", &rb_h, &rb_s, &rb_l, &rb_a);
@@ -605,8 +600,8 @@ static VALUE module_color_hsl(int argc, VALUE argv[], VALUE self) {
         } else {
             c = 2.0f * s * (1.0f - l);
         }
-        float m = l - c / 2.0f; 
-        float p = c + m;        
+        float m = l - c / 2.0f; // min
+        float p = c + m;        // max 
         float q;
         if ( i % 2 == 0) {
             q = l + c * (f - 0.5f);
@@ -679,7 +674,7 @@ static VALUE module_color_rgb_to_hsl(int argc, VALUE argv[], VALUE self) {
         }
         h*=60.0f;
         
-        if (h < 0.0f) h += 360.0f; 
+        if (h < 0.0f) h += 360.0f;
         if (l < 0.5f) {
             s = c / (max_c + min_c);
         } else {
@@ -737,6 +732,4 @@ void Init_screen(VALUE parent) {
     rb_define_method(screen_class, "rects", screen_draw_rects, -1);
     rb_define_method(screen_class, "fill_rect", screen_draw_fill_rect, 4);
     rb_define_method(screen_class, "fill_rects", screen_draw_fill_rects, -1);
-
-
 }

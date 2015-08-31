@@ -98,6 +98,7 @@ SDL_Texture* CreateTextureFromSurface(SDL_Surface* surface, SDL_Renderer* ren, S
     SDL_SetTextureAlphaMod(texture, a);
 
     Uint32 colorKey = 0;
+    // 本来は形式ごとの分岐が必要
     if (SDL_GetColorKey(surface, &colorKey) == 0) {
         *outColorKey = surface->format->palette->colors[colorKey];
         SDL_SetTextureBlendMode(texture, SDL_BLENDMODE_BLEND);
@@ -224,6 +225,7 @@ static VALUE image_dispose(VALUE self) {
 
 static VALUE image_save(VALUE self, VALUE filename) {
     volatile VALUE ext_name = rb_funcall(rb_cFile, rb_intern("extname"), 1, filename);
+    // if (rb_funcall(ext_name, rb_intern("empty?"), 0) == Qtrue) rb_str_cat2(ext_name, "png");
     const char* cExtName = StringValuePtr(ext_name);
     ImageData *image;Data_Get_Struct(self, ImageData, image);
     int pitch;
@@ -265,6 +267,8 @@ static VALUE image_scan(VALUE self, VALUE rb_x, VALUE rb_y, VALUE rb_width, VALU
 
 static VALUE image_scan_tiles(int argc, VALUE argv[], VALUE self) {
     ImageData* imageData; Data_Get_Struct(self, ImageData, imageData);
+    // x, y, width, height(開始点、分割基本サイズx. 分割基本サイズy)
+    // x, y, cutX, cutY(開始点、分割基本数x. 分割基本数y)
     VALUE rb_cutx, rb_cuty;
     volatile VALUE rb_x, rb_y;
     rb_scan_args(argc, argv, "22", &rb_cutx, &rb_cuty, &rb_x, &rb_y);
@@ -399,7 +403,11 @@ static VALUE image_draw_point(VALUE self, VALUE x, VALUE y, VALUE color) {
     return self;
 }
 
+// - from adjust_draw_line_scope to draw_circle by http://dencha.ojaru.jp/index.html
+// @see http://dencha.ojaru.jp/programs_07/pg_graphic_07.html  
+// @see http://dencha.ojaru.jp/programs_07/pg_graphic_09a2.html
 
+// - very thanks!!
 
 static int adjust_draw_line_scope(VALUE self, int *p_start, int *p_end, int sx, int sy, int ex, int ey, int *p_cx, int *p_cy) {
     ImageData* imageData; Data_Get_Struct(self, ImageData, imageData);
@@ -410,6 +418,7 @@ static int adjust_draw_line_scope(VALUE self, int *p_start, int *p_end, int sx, 
     int base_axis = (abs(cx) > abs(cy)) ? 'x' : 'y';
     *p_start = *p_end = 0;
     if (!cx && !cy) return -1;
+    // - x,yの長い方の座標軸をベースにする
     if (base_axis == 'x') {
         img_lim = imageData->rect->w; img_lim_other = imageData->rect->h;
         base_lim = cx; other_lim = cy;
@@ -428,8 +437,10 @@ static int adjust_draw_line_scope(VALUE self, int *p_start, int *p_end, int sx, 
             other_co = (base_axis == 'x') ? ey : ex;
             other_lim = -other_lim;
         }
+        // - x, yの長い方の座標軸で判定
         if (base_co < 0) *p_res = -base_co;
         if (base_co >= img_lim) *p_res = base_co - img_lim + 1;
+        // x, yの短い方の座標軸で判定
         if (!other_lim) continue;
         tmp = other_co + ((*p_res) * (2 * other_lim) + abs(base_lim))/(2*base_lim);
 
@@ -439,7 +450,7 @@ static int adjust_draw_line_scope(VALUE self, int *p_start, int *p_end, int sx, 
         } else if (tmp >= img_lim_other) {
             aim_co = other_co - img_lim_other + 1;
         } else {
-            continue; 
+            continue; // 範囲内なので処理せずそのまま返す
         }
 
         tmp = aim_co * 2 * abs(base_lim) - abs(base_lim);
@@ -454,12 +465,13 @@ static int adjust_draw_line_scope(VALUE self, int *p_start, int *p_end, int sx, 
 static VALUE image_draw_line(VALUE self, VALUE v_sx, VALUE v_sy, VALUE v_ex, VALUE v_ey, VALUE color) {
     int sx = NUM2INT(v_sx), sy = NUM2INT(v_sy);
     int ex = NUM2INT(v_ex), ey = NUM2INT(v_ey);
-    int i,col_index,lim,start,end; 
+    int i,col_index,lim,start,end; // lim = 範囲
     i = col_index = lim = start = end = 0;
     int cx,cy,pos_x,pos_y;
     cx = cy = pos_x = pos_y = 0;
     double_t e;
     int *p_co1, *p_co2, ddis1, ddis2, dn1, dn2;
+    // start - end は傾きっぽい。cx, cyはww,hhかな
     if (adjust_draw_line_scope(self, &start, &end, sx, sy, ex, ey, &cx, &cy ) < 0) return Qnil;
     int base_axis = (abs(cx) > abs(cy)) ? 'x' : 'y';
     if (base_axis == 'x') {
@@ -490,6 +502,7 @@ static VALUE image_draw_line(VALUE self, VALUE v_sx, VALUE v_sy, VALUE v_ex, VAL
     Uint32 c_color = SDL_MapRGBA(fmt, r, g, b, 255);
     SDL_FreeFormat(fmt);
     Uint32 *buff = pixels;
+    // パレット版は一旦省略
     for (i = start; i <= end; ++i) {
         buff[pos_y * imageData->rect->w + pos_x] = c_color;
         (*p_co1) += dn1;
@@ -503,12 +516,14 @@ static VALUE image_draw_line(VALUE self, VALUE v_sx, VALUE v_sy, VALUE v_ex, VAL
     return self;
 }
 
+// 整数版ニュートン法 (return [Double])
 static double_t root(double_t x) {
     double_t s = 1, s2 = 1;
     if (x <= 0) return 1;
     do { s2 =s; s = (x / s + s) / 2; } while (s2 != s);
     return s;
 }
+// 整数版ニュートン法 (return [Int])
 static int root_i(int x) {
     int s = 1, s2 = 1;
     if (x <= 0) return 1;
@@ -530,11 +545,14 @@ typedef struct _pointArray {
 
 static void ScanLineO3(Uint32* pixelsBuff, int width, int leftX, int rightX, 
     int y, Uint32 startColor, SDL_Point **points, int *index) {
+    // 左から右へ探索
     while (leftX <= rightX) {
         for (; leftX <= rightX; leftX++) {
+            // 開始ポイントと同じ色を見つけた
             if (pixelsBuff[width*y+leftX] == startColor) break;
         }
         if (rightX < leftX) break;
+        // 開始ポイント色が入ったブロック列の一番右側にあるブロックを探す。
         for (; leftX <= rightX; leftX++) {
             if (pixelsBuff[width*y+leftX] != startColor ) break;
         }
@@ -546,11 +564,14 @@ static void ScanLineO3(Uint32* pixelsBuff, int width, int leftX, int rightX,
 static void ScanLine(Uint32* pixels, int width, int leftX, int rightX, 
     int y, Uint32 startColor, PointArray* ptArray) {
     PointArray* ptAryBuff;
+    // 左から右へ探索
     while (leftX <= rightX) {
         for (; leftX <= rightX; leftX++) {
+            // 開始ポイントと同じ色を見つけた
             if (pixels[width*y+leftX] == startColor) break;
         }
         if (rightX < leftX) break;
+        // 開始ポイント色が入ったブロック列の一番右側にあるブロックを探す。
         for (; leftX <= rightX; leftX++) {
             if (pixels[width*y+leftX] != startColor ) break;
         }
@@ -591,12 +612,15 @@ static inline void FillShapeScanLineO3(Uint32 *pixels, int x, int y, int width, 
         if (pt.x == -1) break;
         now_i++;
         if (pixels[width*pt.y+pt.x] == fillColor ) continue;
+        // 左端位置を選択
         for (leftX = pt.x; 0 <= leftX; leftX--) {
             if (pixels[width * pt.y + leftX -1] != startColor) break;
         }
+        // 右端位置を検索
         for (rightX = pt.x; rightX < width; rightX++) {
             if (pixels[width * pt.y + rightX + 1] != startColor) break;
         }
+        // 左端から右端まで塗る。
         for (i = leftX; i <= rightX; i++) pixels[width*pt.y+i] = fillColor;
         if (pt.y + 1 < height) ScanLineO3(pixels, width, leftX, rightX, pt.y + 1, startColor, points, &diff_i);
         if (0 <= pt.y - 1) ScanLineO3(pixels, width, leftX, rightX, pt.y - 1, startColor, points, &diff_i);
@@ -609,6 +633,7 @@ static inline void FillShapeScanLine(Uint32 *pixels, int x, int y, int width, in
     Uint32 fillColor, Uint32 startColor) 
 {
     if ( startColor == fillColor ) return;
+    // 先頭はヘッダ扱い。
     PointArray *ptAry = malloc(sizeof(PointArray));
     ptAry->pt = malloc(sizeof(SDL_Point));
     ptAry->pt->x = ptAry->pt->y = -1;
@@ -627,13 +652,17 @@ static inline void FillShapeScanLine(Uint32 *pixels, int x, int y, int width, in
         pt.x = ptAryBuff->pt->x; pt.y = ptAryBuff->pt->y;
 
         if (pixels[width*pt.y+pt.x] == fillColor ) { continue; }
+        // 左端位置を選択
         for (leftX = pt.x; 0 <= leftX; leftX--) {
             if (pixels[width * pt.y +  leftX -1] != startColor) break;
         }
+        // 右端位置を検索
         for (rightX = pt.x; rightX < width; rightX++) {
             if (pixels[width*pt.y + rightX + 1] != startColor) break;
         }
+        // 左端から右端まで塗る。
         for (i = leftX; i <= rightX; i++) pixels[width*pt.y+i] = fillColor;
+        // 下側、上側の位置を探索
         if (pt.y + 1 < height) ScanLine(pixels, width, leftX, rightX, pt.y + 1, startColor, ptAryBuff);
         if (0 <= pt.y - 1) ScanLine(pixels, width, leftX, rightX, pt.y - 1, startColor, ptAryBuff);
     }
@@ -660,7 +689,7 @@ static VALUE image_draw_circle(VALUE self, VALUE v_cx, VALUE v_cy, VALUE v_radiu
     double_t d;
     r_root2 = (diameter > 3) ? root(diameter*diameter/8) : 1;
     tmp = r_root2 * r_root2 * 8 - diameter * diameter;
-    if (abs(tmp) > abs(tmp + 8 * ( 2 * r_root2 + 1))) r_root2++; 
+    if (abs(tmp) > abs(tmp + 8 * ( 2 * r_root2 + 1))) r_root2++; // r * √2の近似値
 
     d = -diameter * diameter + 4 * cy * cy - 4 * cy + 2;
     dx = 4;
@@ -671,6 +700,7 @@ static VALUE image_draw_circle(VALUE self, VALUE v_cx, VALUE v_cy, VALUE v_radiu
         mirror_center.x++;
         mirror_center.y++;
     }
+    // クリッピング
     for (num_eight = 0; num_eight < 8; num_eight++) {
         start_po[num_eight].y = diameter / 2;
         start_po[num_eight].x = 0;
@@ -692,17 +722,18 @@ static VALUE image_draw_circle(VALUE self, VALUE v_cx, VALUE v_cy, VALUE v_radiu
         }
         if (abs(cy) >= (diameter/2)) {
             if (((li == 0 || li == 3) && cy < 0) || ((li == 1 || li == 2) && cy > 0)) {
-                continue; 
+                continue; // 円は範囲内 
             } else {
-                return -1; 
+                return -1; //円は完全に範囲外
             }
         }
 
         tmp = diameter * diameter - 4 * cy * cy;
-        cx = root_i(tmp / 4); 
+        cx = root_i(tmp / 4); // n = tmp / 4; if (tmp % 4) n++;
         tmp -= 4 * cx * cx;
         if (abs(tmp) >= abs(tmp - 8 * cx - 4)) cx++;
         if (cy * y_sign > r_root2) {
+            // 1,2 -> 3,4 -> 5,6 -> 7,0
             if (start_po[li * 2 + 1].x < abs(cx)) {
                 start_po[li * 2 + 1].y = abs(cy);
                 start_po[li * 2 + 1].x = abs(cx);
@@ -712,9 +743,11 @@ static VALUE image_draw_circle(VALUE self, VALUE v_cx, VALUE v_cy, VALUE v_radiu
                 start_po[(li * 2 + 2)%8].x = abs(cx);
             }
         } else {
-            start_po[li * 2 + 1].y = start_po[(li * 2 + 2) % 8].y = 0; 
-            start_po[li * 2 + 1].x = start_po[(li * 2 + 2) % 8].x = diameter; 
+            start_po[li * 2 + 1].y = start_po[(li * 2 + 2) % 8].y = 0; // 範囲外指定
+            start_po[li * 2 + 1].x = start_po[(li * 2 + 2) % 8].x = diameter; // 範囲外指定
             if (cy * y_sign <= r_root2 && cy * y_sign > 0) {
+                // 範囲外指定 … 1,2 -> 3,4 -> 5,6 -> 7,0
+                // 0,3 -> 2,4 -> 4,7 -> 6,1
                 if (end_po[li * 2].x > abs(cy)) {
                     end_po[li * 2].y = abs(cx);
                     end_po[li * 2].x = abs(cy);
@@ -727,6 +760,8 @@ static VALUE image_draw_circle(VALUE self, VALUE v_cx, VALUE v_cy, VALUE v_radiu
                 start_po[li * 2].y = start_po[(li * 2 + 3) % 8].y = 0;
                 start_po[li * 2].x = start_po[(li * 2 + 3) % 8].x = diameter;
                 if (cy * y_sign <= 0 && cy * y_sign > -r_root2) {
+                    // 範囲外指定 … 0,3 -> 2,5 -> 4,7 -> 6,1
+                    // 4,7 -> 6,1 -> 0,3 -> 2,5
                     if (start_po[(li * 2 + 4) % 8].x < abs(cy)) {
                         start_po[(li * 2 + 4) % 8].y = abs(cx);
                         start_po[(li * 2 + 4) % 8].x = abs(cy);
@@ -738,6 +773,9 @@ static VALUE image_draw_circle(VALUE self, VALUE v_cx, VALUE v_cy, VALUE v_radiu
                 } else {
                     start_po[(li * 2 + 4) % 8].y = start_po[(li * 2 + 7) % 8].y = 0;
                     start_po[(li * 2 + 4) % 8].x = start_po[(li * 2 + 7) % 8].x = diameter;
+                    // if (cy < -r_root2 && cy > (diameter / 2)) <- 確定済み
+                    // 範囲外指定 … 4, 7 -> 6,1 -> 0,3 -> 2,5
+                    // 5, 6 -> 7,0 -> 1,2 -> 3,4
                     if (end_po[(li * 2 + 5) % 8].x > abs(cx)) {
                         end_po[(li * 2 + 5) % 8].y = abs(cy);
                         end_po[(li * 2 + 5) % 8].x = abs(cx);
@@ -750,6 +788,7 @@ static VALUE image_draw_circle(VALUE self, VALUE v_cx, VALUE v_cy, VALUE v_radiu
             }
         }
     }
+    // メインループ
     SDL_Texture* texture = imageData->texture;
     void *pixels; int pitch;
     Uint8 a, r, g, b;
@@ -765,21 +804,24 @@ static VALUE image_draw_circle(VALUE self, VALUE v_cx, VALUE v_cy, VALUE v_radiu
         }
         if ((num_eight % 6) <= 1) {
             now_center.x = center.x;
-            x_sign = 1;                      
+            x_sign = 1;                      // 0, 1, 6, 7
         } else {
             now_center.x = mirror_center.x;
-            x_sign = -1;                     
+            x_sign = -1;                     // 2, 3, 4, 5
         }
         if ((num_eight % 4) % 3) {
             px = &cx; py = &cy;
         } else {
             px = &cy; py = &cx;
         }
+        // 初期値
         cy = start_po[num_eight].y;
         cx = start_po[num_eight].x;
+        // d値
         d = 4 * cx * cx + 4 * cy * cy - 4 * cy + 2 - diameter * diameter;
         dx = 8 * cx + 4;
         dy = -8 * cy + 8;
+        // 描画ループ
         SDL_LockTexture(texture, NULL, &pixels, &pitch);
         r = NUM2INT(rb_ary_entry(color, 0)); 
         g = NUM2INT(rb_ary_entry(color, 1)); 
@@ -1081,6 +1123,7 @@ static VALUE image_get_height(VALUE self) {
     return rb_int_new(imageData->rect->h);
 }
 
+// Thanks from - http://dxruby.sourceforge.jp/cgi-bin/hiki.cgi?Imagr%23roundbox
 static VALUE image_draw_roundbox(VALUE self, VALUE x, VALUE y, 
     VALUE width, VALUE height, VALUE radius, VALUE color)
 {
@@ -1107,6 +1150,7 @@ static VALUE image_draw_roundbox(VALUE self, VALUE x, VALUE y,
     return self;
 }
 
+// Thanks from - http://dxruby.sourceforge.jp/cgi-bin/hiki.cgi?Imagr%23roundbox
 static VALUE image_draw_fill_roundbox(VALUE self, VALUE x, VALUE y, 
     VALUE width, VALUE height, VALUE radius, VALUE color)
 {

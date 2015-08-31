@@ -110,10 +110,11 @@ double_t easing_sin_in_out(double_t nowTime, double_t initNum, double_t changeNu
 double_t easing_sin_out_in(double_t nowTime, double_t initNum, double_t changeNum, double_t duration) {
     if (nowTime < duration / 2) { return easing_sin_out(nowTime*2, initNum, changeNum/2,duration); }
     return easing_sin(nowTime*2-duration, initNum+changeNum/2, changeNum/2, duration);
-};
+}
+
 double_t easing_expo(double_t nowTime, double_t initNum, double_t changeNum, double_t duration) {
     return changeNum * pow( 2, 10 * (nowTime/duration - 1) ) + initNum;
-};
+}
 
 double_t easing_expo_out(double_t nowTime, double_t initNum, double_t changeNum, double_t duration) {
     return changeNum * ( -pow( 2, -10 * nowTime/duration ) + 1 ) + initNum;
@@ -190,7 +191,7 @@ static VALUE tween_initialize(int argc, VALUE argv[], VALUE self) {
             break;        
     }
     tweenData->duration = NUM2INT(duration);
-    tweenData->nowTime = 0; 
+    tweenData->nowTime = 0;
     VALUE easing_str = rb_sym_to_s(easing);
 
     const char* result= StringValuePtr(easing_str);
@@ -313,11 +314,9 @@ static VALUE tween_get_event_now(VALUE self) {
     return rb_int_new(tweenData->nowTime);
 }
 
-
 static VALUE tween_get_event_manager(VALUE self) {
     return rb_ivar_get(self, rb_intern("@event_manager"));
 }
-
 
 void Init_tween(VALUE parent) {
     VALUE tween_class = rb_define_class_under(parent, "Tween", rb_cObject);

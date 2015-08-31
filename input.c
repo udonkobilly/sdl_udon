@@ -4,7 +4,7 @@ static st_table* keyConfig = NULL;
 static st_table** padConfig = NULL;
 static st_table* mouseConfig = NULL;
 static st_table* keyCodeMap = NULL;
-static char* keyCodeTableTargetKey = NULL; 
+static char* keyCodeTableTargetKey = NULL; // 探索用。
 
 InputData *inputData = NULL;
 
@@ -19,7 +19,7 @@ static const char*BUTTON_STRS[] = {"lbtn", "mbtn", "rbtn"};
 typedef struct {
     JoyPad *joyPad;
     Sint16 x,y,z;
-    Uint8 axis[4]; 
+    Uint8 axis[4]; // up, down, left, right
     RepeatData axisRepeatDatas[4];
     int buttonNum;
     Uint8 *buttons;
@@ -28,10 +28,11 @@ typedef struct {
     BOOL buttonUped;
     Uint32 upButtonsBit;
 } JoyPadData;
+
 static JoyPadData **mJoyPadData;
 
 static inline int16_t keyNameToNum(const char*name) {
-    st_data_t data = Qnil;
+    st_data_t data;
     return (st_lookup(keyCodeMap, (st_data_t)name, &data) == 0) ? -1 : (int16_t)data;
 }
 
@@ -44,18 +45,19 @@ static inline int16_t padNameToNum(const char*name) {
     int16_t result = -1;
     size_t nameLen = strlen(name);
     const char *axisStrs[] = {"up", "down", "left", "right"};
-    int i; for (i = 0; i  < 4; ++i) { 
+    for (int i = 0; i  < 4; ++i) { 
         if (strncmp(name, axisStrs[i], nameLen) == 0) {
             result = i;
             break;
         }
     }
     if (result == -1) {
-            int16_t temp = strtol(name, NULL, 10);
-            if (temp != 0) { result = temp + 4; }
+        int16_t temp = strtol(name, NULL, 10);
+        if (temp != 0) { result = temp + 4; }
     }
     return result;
 }
+
 static inline BOOL isPadStateFromNum(int num, int index, Uint8 state) {    
     if (SDL_NumJoysticks() == 0 || num < 0) return FALSE;
     JoyPadData *joy = mJoyPadData[index];
@@ -93,19 +95,21 @@ inline void mouseEventManager() {
     mouse->btn_states[2] = mouse->btn_states[2] & ~1;
 
     if (result) {
-        int i; for (i = 0; i < 3; ++i) {
+        for (int i = 0; i < 3; ++i) {
             if (result & SDL_BUTTON(i+1)) {
                 mouse->btn_states[i] = 2 | 4;
                 if (mouse->btnRepeatDatas[i]->duration == -1) { continue; }
                 if (mouse->btnRepeatDatas[i]->durationCount < mouse->btnRepeatDatas[i]->duration) {
-                    mouse->btnRepeatDatas[i]->durationCount++; continue;  
+                    mouse->btnRepeatDatas[i]->durationCount++; continue;
                 }
+                // wait-start
                 if (mouse->btnRepeatDatas[i]->wait == -1) { mouse->btn_states[i] = 2;  continue; }
                 if (mouse->btnRepeatDatas[i]->waitCount <= mouse->btnRepeatDatas[i]->wait) {
                     if (mouse->btnRepeatDatas[i]->waitCount != mouse->btnRepeatDatas[i]->wait) { mouse->btn_states[i] = 2; }
                     mouse->btnRepeatDatas[i]->waitCount++;
                     continue;
                 }
+                // interval-start
                 if (mouse->btnRepeatDatas[i]->interval == -1) { mouse->btn_states[i] = 2;  continue; }
                 if (mouse->btnRepeatDatas[i]->intervalCount >= mouse->btnRepeatDatas[i]->interval) {
                     mouse->btnRepeatDatas[i]->intervalCount = 0;
@@ -115,34 +119,23 @@ inline void mouseEventManager() {
                 }
             }
         }
-    } else {
-        int i; for (i = 0; i < 3; ++i) {
+    } else { // up時
+        for (int i = 0; i < 3; ++i) {
             if ((mouse->btn_states[i] & 2) != 0) {
                 mouse->btn_states[i] = (mouse->btn_states[i] | 1) & 1;
                 mouse->btnRepeatDatas[i]->durationCount = mouse->btnRepeatDatas[i]->waitCount = mouse->btnRepeatDatas[i]->intervalCount = 0;
             }
         }
     }
-    if (x != mouse->x || y != mouse->y ) {
-        mouse->moving = TRUE;
-    } else {
-        mouse->moving = FALSE;
-    }
+    mouse->moving = (x != mouse->x || y != mouse->y) ? TRUE : FALSE; 
     mouse->dx = x - mouse->x; mouse->dy = y - mouse->y;
     mouse->x = x; mouse->y = y;
 }
 
 static VALUE input_mouse_x(VALUE self) { return rb_int_new(inputData->mouse->x); }
-
 static VALUE input_mouse_y(VALUE self) { return rb_int_new(inputData->mouse->y); }
-
-
 static VALUE input_mouse_delta_x(VALUE self) { return rb_int_new(inputData->mouse->dx); }
-
-
 static VALUE input_mouse_delta_y(VALUE self) { return rb_int_new(inputData->mouse->dy); }
-
-
 
 static VALUE input_mouse_state(VALUE btn_sym, Uint8 state) {
     VALUE btn_sym_to_s = rb_funcall(btn_sym, rb_intern("to_s"), 0);
@@ -190,26 +183,26 @@ static VALUE input_mouse_move(VALUE self, VALUE x, VALUE y) {
 
 static inline BOOL ParseKeyBoardState(Uint8 *state, KeyData *keyData) {
     keyData->state = keyData->state & ~1; 
-    if (*state == 1) { 
+    if (*state == 1) { // down or push
         keyData->state = 2 | 4;
         if (keyData->repeatData->duration == -1) { return FALSE; }
         if (keyData->repeatData->durationCount < keyData->repeatData->duration) {
             keyData->repeatData->durationCount++; return FALSE;
         }
-        if (keyData->repeatData->wait == -1) { keyData->state = 2;  return FALSE; } 
+        if (keyData->repeatData->wait == -1) { keyData->state = 2;  return FALSE; } // ここからwait開始
         if (keyData->repeatData->waitCount <= keyData->repeatData->wait) {
             if (keyData->repeatData->waitCount != keyData->repeatData->wait) { keyData->state = 2; }
             keyData->repeatData->waitCount++;
             return FALSE;
         }
-        if (keyData->repeatData->interval == -1) { keyData->state = 2;  return FALSE; } 
+        if (keyData->repeatData->interval == -1) { keyData->state = 2;  return FALSE; } // interval開始
         if (keyData->repeatData->intervalCount >= keyData->repeatData->interval) {
             keyData->repeatData->intervalCount = 0;
         } else {
             keyData->state = 2;
             keyData->repeatData->intervalCount++;
         }
-    } else if ((keyData->state & 2) != 0 && *state == 0) { 
+    } else if ((keyData->state & 2) != 0 && *state == 0) { // up
          keyData->repeatData->durationCount = keyData->repeatData->waitCount = keyData->repeatData->intervalCount = 0;
          keyData->state = keyData->state & ~(2 | 4) | 1;
     }
@@ -224,17 +217,18 @@ void keyEventManager() {
     for (i = size; i < size+8; ++i) { if (!ParseKeyBoardState((Uint8*)&state[i + 4 + 124], &keyData[i])) continue; }
 }   
 
-
 inline void joyPadButtonUpManager(SDL_JoyButtonEvent *event) {
     JoyPadData *data = mJoyPadData[event->which];
     data->buttonUped = TRUE;
     data->upButtonsBit = data->upButtonsBit | (1 << event->button);
 }
+
 void joyPadEventManager() {
     Sint16 x_move, y_move;
     int i; for (i = 0; i < SDL_NumJoysticks(); ++i) {
         JoyPadData *data = mJoyPadData[i];       
         if (SDL_IsGameController(i)) {
+            /* 後で書く */
         } else {
             data->axis[0] = data->axis[0] & ~1; data->axis[1] = data->axis[1] & ~1;
             data->axis[2] = data->axis[2] & ~1; data->axis[3] = data->axis[3] & ~1;
@@ -253,19 +247,22 @@ void joyPadEventManager() {
                 }
                 data->x = 0;
             } else if (x_move != 0) { 
+                // down or push
                 x_move = x_move / abs(x_move);
                 if (x_move == -1) {
                     data->axis[2] =  2 | 4;
-                    data->x = x_move; 
+                    data->x = x_move; // old
                     if (data->axisRepeatDatas[2].duration == -1) { continue; }
                     if (data->axisRepeatDatas[2].durationCount < data->axisRepeatDatas[2].duration) {
                         data->axisRepeatDatas[2].durationCount++; continue;  
                     }
+                    // wait-start
                     if (data->axisRepeatDatas[2].wait == -1) { data->axis[2] = 2;  continue; }
                     if (data->axisRepeatDatas[2].waitCount <= data->axisRepeatDatas[2].wait) {
                         if (data->axisRepeatDatas[2].waitCount != data->axisRepeatDatas[2].wait) { data->axis[2] = 2; }
                         data->axisRepeatDatas[2].waitCount++; continue;
                     }
+                    // interval-start
                     if (data->axisRepeatDatas[2].interval == -1) { data->axis[2] = 2;  continue; }
                     if (data->axisRepeatDatas[2].intervalCount >= data->axisRepeatDatas[2].interval) {
                         data->axisRepeatDatas[2].intervalCount = 0;
@@ -281,11 +278,13 @@ void joyPadEventManager() {
                     if (data->axisRepeatDatas[3].durationCount < data->axisRepeatDatas[3].duration) {
                         data->axisRepeatDatas[3].durationCount++; continue;  
                     }
+                    // wait-start
                     if (data->axisRepeatDatas[3].wait == -1) { data->axis[3] = 2;  continue; }
                     if (data->axisRepeatDatas[3].waitCount <= data->axisRepeatDatas[3].wait) {
                         if (data->axisRepeatDatas[3].waitCount != data->axisRepeatDatas[3].wait) { data->axis[3] = 2; }
                         data->axisRepeatDatas[3].waitCount++; continue;
                     }
+                    // start-interval
                     if (data->axisRepeatDatas[3].interval == -1) { data->axis[3] = 2;  continue; }
                     if (data->axisRepeatDatas[3].intervalCount >= data->axisRepeatDatas[3].interval) {
                         data->axisRepeatDatas[3].intervalCount = 0;
@@ -417,11 +416,12 @@ static VALUE input_is_pad_state(int argc, VALUE argv[], Uint8 state) {
 static VALUE input_is_pad_up(int argc, VALUE argv[], VALUE self) { return input_is_pad_state(argc, argv, 0x01); }
 static VALUE input_is_pad_down(int argc, VALUE argv[], VALUE self) { return input_is_pad_state(argc, argv, 0x02); }
 static VALUE input_is_pad_push(int argc, VALUE argv[], VALUE self) { return input_is_pad_state(argc, argv, 0x04); }
+
 static VALUE input_is_pad_btns(int argc, VALUE argv[], VALUE self) {
     if (SDL_NumJoysticks() == 0) { return Qnil; }
-    VALUE action, index_and_btns_syms;  
+    VALUE action, index_and_btns_syms;
     rb_scan_args(argc, argv, "1*", &action, &index_and_btns_syms);
-    VALUE index = rb_ary_entry(index_and_btns_syms, 0);
+    volatile VALUE index = rb_ary_entry(index_and_btns_syms, 0);
     if ( rb_funcall(index, rb_intern("class"), 0) == rb_cFixnum ) {
         rb_funcall(index_and_btns_syms, rb_intern("shift"), 0);
     } else {
@@ -430,18 +430,19 @@ static VALUE input_is_pad_btns(int argc, VALUE argv[], VALUE self) {
 
     int size = NUM2INT(rb_funcall(index_and_btns_syms, rb_intern("size"), 0));
     VALUE sym_to_s = rb_funcall(action, rb_intern("to_s"), 0);
-    const char* c_action = StringValuePtr(sym_to_s );
-    size_t len = strlen(c_action);
+    const char* cAction = StringValuePtr(sym_to_s );
+    size_t len = strlen(cAction);
     ID action_method_id;
-    if (strncmp(c_action, "up", len) == 0) {
+    if (strncmp(cAction, "up", len) == 0) {
         action_method_id =rb_intern("pad_up?");
-    } else if (strncmp(c_action, "down", len) == 0) {
+    } else if (strncmp(cAction, "down", len) == 0) {
         action_method_id =rb_intern("pad_down?");
-    } else if (strncmp(c_action, "push", len) == 0) {
+    } else if (strncmp(cAction, "push", len) == 0) {
         action_method_id =rb_intern("pad_push?");
     } else {
         return Qnil;
     }
+    // up, down, push
     VALUE boolean = Qtrue;
     int i; for (i = 0; i < size; ++i) {
         if (rb_funcall(self, action_method_id, 2, rb_ary_entry(index_and_btns_syms, i), index) == Qfalse) {
@@ -477,8 +478,10 @@ static int FreeKeyCodeMap(st_data_t k, st_data_t v, st_data_t arg) {
 
 
 void Quit_input() {
+    int i = 0;
     if (SDL_NumJoysticks() > 0) {
-        int i;for (i = 0; i < SDL_NumJoysticks(); ++i) {
+        int j = 0;
+        for (i = 0; i < SDL_NumJoysticks(); ++i) {
             if (SDL_IsGameController(i)) {
                 SDL_GameControllerClose(mJoyPadData[i]->joyPad->gamepad);
             } else {
@@ -486,7 +489,7 @@ void Quit_input() {
             }
             free(mJoyPadData[i]->joyPad);
             free(mJoyPadData[i]->buttons);
-            int j; for (j = 0; j < mJoyPadData[i]->buttonNum; ++j) {
+            for (j = 0; j < mJoyPadData[i]->buttonNum; ++j) {
                 free(mJoyPadData[i]->buttonRepeatDatas[j]);
             }
             free(mJoyPadData[i]->buttonRepeatDatas);
@@ -495,11 +498,11 @@ void Quit_input() {
     }
     free(mJoyPadData);
     
-    int i;for (i = 0; i < SDL_SCANCODE_KP_PERIOD - SDL_SCANCODE_A + 1 + 8; ++i) {
+    for (i = 0; i < SDL_SCANCODE_KP_PERIOD - SDL_SCANCODE_A + 1 + 8; ++i) {
         free(inputData->key->keyData[i].repeatData);
     }
     free(inputData->key);
-    int k;for (k = 0; k < 3; ++k) free(inputData->mouse->btnRepeatDatas[k]);
+    for (i = 0; i < 3; ++i) free(inputData->mouse->btnRepeatDatas[i]);
     free(inputData->mouse);
     free(inputData);
 
@@ -507,9 +510,9 @@ void Quit_input() {
     st_free_table(keyConfig);
     st_foreach(mouseConfig, FreeConfig, (st_data_t)NULL);
     st_free_table(mouseConfig);
-    int j;for (j = 0; j < SDL_NumJoysticks(); ++j) {
-        st_foreach(padConfig[j], FreeConfig, (st_data_t)NULL);
-        st_free_table(padConfig[j]);
+    for (i = 0; i < SDL_NumJoysticks(); ++i) {
+        st_foreach(padConfig[i], FreeConfig, (st_data_t)NULL);
+        st_free_table(padConfig[i]);
     }
     free(padConfig);
     
@@ -531,7 +534,6 @@ static inline VALUE input_key(const char* cKeyStr, Uint8 keyState) {
             uint8_t padNum = data & 0xff;
             uint8_t padIndex = (data & 0xff00) >> 8;
             uint8_t mouseNum = (data & 0xff0000) >> 16;
-
             if (padNum != 255 && isPadStateFromNum(padNum, padIndex, keyState)) {
                 return Qtrue;
             } else if (mouseNum != 255 && isMouseStateFromNum(mouseNum, keyState)) {
@@ -542,14 +544,17 @@ static inline VALUE input_key(const char* cKeyStr, Uint8 keyState) {
     }
     return Qnil;
 }
+
 static VALUE input_key_up(VALUE self, VALUE key_sym) {
     VALUE str = rb_sym_to_s(key_sym);
     return input_key(StringValuePtr(str), 1); 
 }
+
 static VALUE input_key_down(VALUE self, VALUE key_sym) { 
     VALUE str = rb_sym_to_s(key_sym);
     return input_key(StringValuePtr(str), 2); 
 }
+
 static VALUE input_key_push(VALUE self, VALUE key_sym) { 
     VALUE str = rb_sym_to_s(key_sym);
     return input_key(StringValuePtr(str), 4); 
@@ -627,7 +632,8 @@ static VALUE input_push_pads(int argc, VALUE argv[], VALUE self) {
     VALUE index; rb_scan_args(argc, argv, "01", &index);
     JoyPadData* data = NIL_P(index) ? mJoyPadData[0] : mJoyPadData[NUM2INT(index)];
     VALUE str;
-    int i; for (i = 0; i < 4; ++i) {
+    int i; 
+    for (i = 0; i < 4; ++i) {
         if (data->axis[i] & 0x04)
             rb_funcall(result, rb_intern("push"), 1, rb_funcall(rb_str_new2(AXIS_STRS[i]), rb_intern("to_sym"), 0));
     }
@@ -638,10 +644,11 @@ static VALUE input_push_pads(int argc, VALUE argv[], VALUE self) {
         }
     }
     if (rb_block_given_p()) {
-        int i; for (i = 0; i < RARRAY_LEN(result); ++i) rb_yield(RARRAY_PTR(result)[i]);
+        for (i = 0; i < RARRAY_LEN(result); ++i) rb_yield(RARRAY_PTR(result)[i]);
     }
     return result; 
 }
+
 static VALUE input_down_pads(int argc, VALUE argv[], VALUE self) { 
     if (SDL_NumJoysticks() == 0) return rb_ary_new();
     volatile VALUE result = rb_ary_new();
@@ -649,7 +656,8 @@ static VALUE input_down_pads(int argc, VALUE argv[], VALUE self) {
     if (NIL_P(index)) index = rb_int_new(0);
     JoyPadData* data = ( NIL_P(index) ? mJoyPadData[0] : mJoyPadData[NUM2INT(index)] );
     VALUE str;
-    int i; for (i = 0; i < 4; ++i) {
+    int i; 
+    for (i = 0; i < 4; ++i) {
         if (data->axis[i] & 0x02)
             rb_funcall(result, rb_intern("push"), 1, rb_funcall(rb_str_new2(AXIS_STRS[i]), rb_intern("to_sym"), 0));
     }
@@ -660,7 +668,7 @@ static VALUE input_down_pads(int argc, VALUE argv[], VALUE self) {
         }
     }
     if (rb_block_given_p()) {
-        int i; for (i = 0; i < RARRAY_LEN(result); ++i) rb_yield(RARRAY_PTR(result)[i]);
+        for (i = 0; i < RARRAY_LEN(result); ++i) rb_yield(RARRAY_PTR(result)[i]);
     }
     return result; 
 }
@@ -671,7 +679,8 @@ static VALUE input_up_pads(int argc, VALUE argv[], VALUE self) {
     VALUE index; rb_scan_args(argc, argv, "01", &index);
     JoyPadData* data = NIL_P(index) ? mJoyPadData[0] : mJoyPadData[NUM2INT(index)];
     VALUE str;
-    int i; for (i = 0; i < 4; ++i) {
+    int i; 
+    for (i = 0; i < 4; ++i) {
         if (data->axis[i] & 0x01)
             rb_funcall(result, rb_intern("push"), 1, rb_funcall(rb_str_new2(AXIS_STRS[i]), rb_intern("to_sym"), 0));
     }
@@ -683,7 +692,7 @@ static VALUE input_up_pads(int argc, VALUE argv[], VALUE self) {
     }
 
     if (rb_block_given_p()) {
-        int i; for (i = 0; i < RARRAY_LEN(result); ++i) rb_yield(RARRAY_PTR(result)[i]);
+        for (i = 0; i < RARRAY_LEN(result); ++i) rb_yield(RARRAY_PTR(result)[i]);
     }
     return result;
 }
@@ -691,41 +700,44 @@ static VALUE input_up_pads(int argc, VALUE argv[], VALUE self) {
 static VALUE input_push_mouses(int argc, VALUE argv[], VALUE self) { 
     volatile VALUE result = rb_ary_new();
     MouseData *data = inputData->mouse;
-    int i; for (i = 0; i < 3; ++i) {
+    int i; 
+    for (i = 0; i < 3; ++i) {
         if (data->btn_states[i] & 0x04)
             rb_funcall(result, rb_intern("push"), 1, rb_funcall(rb_str_new2(BUTTON_STRS[i]) , rb_intern("to_sym"), 0));
     }
     if (rb_block_given_p()) {
-        int i; for (i = 0; i < RARRAY_LEN(result); ++i) rb_yield(RARRAY_PTR(result)[i]);
+        for (i = 0; i < RARRAY_LEN(result); ++i) rb_yield(RARRAY_PTR(result)[i]);
     }
     return result;
 }
+
 static VALUE input_down_mouses(VALUE self) { 
     volatile VALUE result = rb_ary_new();
     MouseData *data = inputData->mouse;
-    int i; for (i = 0; i < 3; ++i) {
+    int i; 
+    for (i = 0; i < 3; ++i) {
         if (data->btn_states[i] & 0x02)
             rb_funcall(result, rb_intern("push"), 1, rb_funcall(rb_str_new2(BUTTON_STRS[i]) , rb_intern("to_sym"), 0));
     }
     if (rb_block_given_p()) {
-        int i; for (i = 0; i < RARRAY_LEN(result); ++i) rb_yield(RARRAY_PTR(result)[i]);
+        for (i = 0; i < RARRAY_LEN(result); ++i) rb_yield(RARRAY_PTR(result)[i]);
     }
     return result; 
 }
+
 static VALUE input_up_mouses(VALUE self) { 
     volatile VALUE result = rb_ary_new();
     MouseData *data = inputData->mouse;
-    int i; for (i = 0; i < 3; ++i) {
+    int i; 
+    for (i = 0; i < 3; ++i) {
         if (data->btn_states[i] & 0x01)
             rb_funcall(result, rb_intern("push"), 1, rb_funcall(rb_str_new2(BUTTON_STRS[i]) , rb_intern("to_sym"), 0));
     }
     if (rb_block_given_p()) {
-        int i; for (i = 0; i < RARRAY_LEN(result); ++i) rb_yield(RARRAY_PTR(result)[i]);
+        for (i = 0; i < RARRAY_LEN(result); ++i) rb_yield(RARRAY_PTR(result)[i]);
     }
     return result; 
 }
-
-
 
 static volatile VALUE sym_left = Qundef;
 
@@ -733,12 +745,12 @@ static VALUE input_is_x(int argc, VALUE argv[], VALUE self) {
     volatile VALUE index;
     if (rb_scan_args(argc, argv, "01", &index) == 0) { index = rb_int_new(0);  }
     JoyPadData *joy = ( (SDL_NumJoysticks() == 0) || (NUM2INT(index) >= SDL_NumJoysticks()) ) ? NULL : mJoyPadData[NUM2INT(index)];
-    int result_x = 0;
+    int x = 0;
     if ( (input_key_down(self, sym_left) == Qtrue) || (joy && joy->x == -1)) 
-        result_x -= 1;
+        x -= 1;
     if ( (input_key_down(self, ID2SYM(rb_intern("right"))) == Qtrue) || (joy && joy->x == 1)) 
-        result_x += 1;
-    return rb_int_new(result_x);
+        x += 1;
+    return rb_int_new(x);
 }
 
 static VALUE input_is_y(int argc, VALUE argv[], VALUE self) {
@@ -758,7 +770,6 @@ inline void InputManager() {
     joyPadEventManager();
     keyEventManager(); 
     SDL_PumpEvents();
-
     mouseEventManager();    
 }
 
@@ -773,9 +784,9 @@ static void repeat_option_parse(int argc, VALUE argv[], VALUE self, char** cTarg
         *cTarget = StringValuePtr( temp );
     }
     if (arity <= 2 ) {
-        *cDuration = rb_hash_lookup(duration_or_option, ID2SYM(rb_intern("duration")));
-        *cWait = rb_hash_lookup(duration_or_option, ID2SYM(rb_intern("wait")));
-        *cInterval = rb_hash_lookup(duration_or_option, ID2SYM(rb_intern("interval")));
+        *cDuration = NUM2INT(rb_hash_lookup(duration_or_option, ID2SYM(rb_intern("duration"))));
+        *cWait = NUM2INT(rb_hash_lookup(duration_or_option, ID2SYM(rb_intern("wait"))));
+        *cInterval = NUM2INT(rb_hash_lookup(duration_or_option, ID2SYM(rb_intern("interval"))));
     } else {
         *cDuration = NUM2INT(duration_or_option);
         *cWait = NUM2INT(wait);
@@ -785,17 +796,17 @@ static void repeat_option_parse(int argc, VALUE argv[], VALUE self, char** cTarg
 }
 
 static void input_key_repeat_all(int argc, VALUE argv[], VALUE self) {
-    int cDuration, cWait, cInterval;
-    repeat_option_parse(argc, argv, self, NULL, &cDuration, &cWait, &cInterval, NULL);
+    int duration, wait, interval;
+    repeat_option_parse(argc, argv, self, NULL, &duration, &wait, &interval, NULL);
     KeyData *keyData = inputData->key->keyData;
     int i;for (i = 0; i < SDL_SCANCODE_KP_PERIOD - SDL_SCANCODE_A + 1; ++i) {
         if (keyData[i].repeatData->duration <= keyData[i].repeatData->durationCount)
-            keyData[i].repeatData->durationCount = cDuration; 
+            keyData[i].repeatData->durationCount = duration; 
         if (keyData[i].repeatData->wait < keyData[i].repeatData->waitCount)
-            keyData[i].repeatData->waitCount = cWait + 1;
-        keyData[i].repeatData->duration = cDuration;
-        keyData[i].repeatData->wait = cWait;
-        keyData[i].repeatData->interval = cInterval;
+            keyData[i].repeatData->waitCount = wait + 1;
+        keyData[i].repeatData->duration = duration;
+        keyData[i].repeatData->wait = wait;
+        keyData[i].repeatData->interval = interval;
     }
 }
 
@@ -804,29 +815,29 @@ static VALUE input_key_repeat(int argc, VALUE argv[], VALUE self) {
     if (type == T_HASH || type == T_FIXNUM ) {
         input_key_repeat_all(argc, argv, self); return self;
     }
-    char *cTarget = NULL;
-    int cDuration, cWait, cInterval;
-    repeat_option_parse(argc, argv, self, &cTarget, &cDuration, &cWait, &cInterval, NULL);
+    char *target = NULL;
+    int duration, wait, interval;
+    repeat_option_parse(argc, argv, self, &target, &duration, &wait, &interval, NULL);
     st_data_t data = Qnil;
-    if (st_lookup(keyCodeMap, (st_data_t)cTarget, &data) == 0 ) return Qnil;
+    if (st_lookup(keyCodeMap, (st_data_t)target, &data) == 0 ) return Qnil;
     KeyData *keyData = inputData->key->keyData;
     if (keyData[data-4].repeatData->duration <= keyData[data-4].repeatData->durationCount)
-        keyData[data-4].repeatData->durationCount = cDuration; 
+        keyData[data-4].repeatData->durationCount = duration; 
     if (keyData[data-4].repeatData->wait < keyData[data-4].repeatData->waitCount)
-        keyData[data-4].repeatData->waitCount = cWait + 1;
-    keyData[data-4].repeatData->duration = cDuration;
-    keyData[data-4].repeatData->wait = cWait;
-    keyData[data-4].repeatData->interval = cInterval;
+        keyData[data-4].repeatData->waitCount = wait + 1;
+    keyData[data-4].repeatData->duration = duration;
+    keyData[data-4].repeatData->wait = wait;
+    keyData[data-4].repeatData->interval = interval;
     return self;
 }
 
 static void input_pad_repeat_all(int argc, VALUE argv[], VALUE self) {
-    int cDuration, cWait, cInterval, cIndex = -1;
-    repeat_option_parse(argc, argv, self, NULL, &cDuration, &cWait, &cInterval, &cIndex);
+    int duration, wait, interval, index = -1;
+    repeat_option_parse(argc, argv, self, NULL, &duration, &wait, &interval, &index);
     int sticks = SDL_NumJoysticks();
     int i = 0;
-    if (cIndex != -1) {
-        i = cIndex;
+    if (index != -1) {
+        i = index;
         sticks = i + 1;
     }
 
@@ -836,21 +847,21 @@ static void input_pad_repeat_all(int argc, VALUE argv[], VALUE self) {
         } else {
             int j; for (j = 0; j < 4; ++j) {
                 if (data->axisRepeatDatas[j].duration <= data->axisRepeatDatas[j].durationCount)
-                    data->axisRepeatDatas[j].durationCount = cDuration; 
+                    data->axisRepeatDatas[j].durationCount = duration; 
                 if (data->axisRepeatDatas[j].wait < data->axisRepeatDatas[j].waitCount)
-                    data->axisRepeatDatas[j].waitCount = cWait + 1;
-                data->axisRepeatDatas[j].duration = cDuration;
-                data->axisRepeatDatas[j].wait = cWait;
-                data->axisRepeatDatas[j].interval = cInterval;
+                    data->axisRepeatDatas[j].waitCount = wait + 1;
+                data->axisRepeatDatas[j].duration = duration;
+                data->axisRepeatDatas[j].wait = wait;
+                data->axisRepeatDatas[j].interval = interval;
             }
             int k;for (k = 0; k < data->buttonNum; ++k) {
                 if (data->buttonRepeatDatas[k]->duration <= data->buttonRepeatDatas[k]->durationCount)
-                    data->buttonRepeatDatas[k]->durationCount = cDuration; 
+                    data->buttonRepeatDatas[k]->durationCount = duration; 
                 if (data->buttonRepeatDatas[k]->wait < data->buttonRepeatDatas[k]->waitCount)
-                    data->buttonRepeatDatas[k]->waitCount = cWait + 1;
-                data->buttonRepeatDatas[k]->duration = cDuration;
-                data->buttonRepeatDatas[k]->wait = cWait;
-                data->buttonRepeatDatas[k]->interval = cInterval;
+                    data->buttonRepeatDatas[k]->waitCount = wait + 1;
+                data->buttonRepeatDatas[k]->duration = duration;
+                data->buttonRepeatDatas[k]->wait = wait;
+                data->buttonRepeatDatas[k]->interval = interval;
             }
         }
     }
@@ -861,55 +872,55 @@ static VALUE input_pad_repeat(int argc, VALUE argv[], VALUE self) {
     if (type == T_HASH || type == T_FIXNUM ) {
         input_pad_repeat_all(argc, argv, self); return self;
     }
-    char *cTarget = NULL;
-    int cDuration, cWait, cInterval, cIndex = 0;
-    repeat_option_parse(argc, argv, self, &cTarget, &cDuration, &cWait, &cInterval, &cIndex);
-    if (cIndex >= SDL_NumJoysticks()) { return Qnil; }
-    JoyPadData *data = mJoyPadData[cIndex];
-    if (SDL_IsGameController(cIndex)) {
+    char *target = NULL;
+    int duration, wait, interval, index = 0;
+    repeat_option_parse(argc, argv, self, &target, &duration, &wait, &interval, &index);
+    if (index >= SDL_NumJoysticks()) { return Qnil; }
+    JoyPadData *data = mJoyPadData[index];
+    if (SDL_IsGameController(index)) {
     } else {
-        size_t targetLen = strlen(cTarget);
+        size_t targetLen = strlen(target);
         const char *axisStrs[] = {"up", "down", "left", "right"};
         int axisIndex = -1;
         int i; for (i = 0; i  < 4; ++i) { 
-            if (strncmp(cTarget, axisStrs[i], targetLen) == 0) {
+            if (strncmp(target, axisStrs[i], targetLen) == 0) {
                 axisIndex = i;
                 break;
             }
         }
         if (axisIndex == -1) {
-            long btnIndex = strtol(cTarget, NULL, 10);
+            long btnIndex = strtol(target, NULL, 10);
             if (data->buttonRepeatDatas[btnIndex]->duration <= data->buttonRepeatDatas[btnIndex]->durationCount)
-                data->buttonRepeatDatas[btnIndex]->durationCount = cDuration; 
+                data->buttonRepeatDatas[btnIndex]->durationCount = duration; 
             if (data->buttonRepeatDatas[btnIndex]->wait < data->buttonRepeatDatas[btnIndex]->waitCount)
-                data->buttonRepeatDatas[btnIndex]->waitCount = cWait + 1;
-            data->buttonRepeatDatas[btnIndex]->duration = cDuration;
-            data->buttonRepeatDatas[btnIndex]->wait = cWait;
-            data->buttonRepeatDatas[btnIndex]->interval = cInterval;
+                data->buttonRepeatDatas[btnIndex]->waitCount = wait + 1;
+            data->buttonRepeatDatas[btnIndex]->duration = duration;
+            data->buttonRepeatDatas[btnIndex]->wait = wait;
+            data->buttonRepeatDatas[btnIndex]->interval = interval;
         } else {
             if (data->axisRepeatDatas[axisIndex].duration <= data->axisRepeatDatas[axisIndex].durationCount)
-                data->axisRepeatDatas[axisIndex].durationCount = cDuration; 
+                data->axisRepeatDatas[axisIndex].durationCount = duration; 
             if (data->axisRepeatDatas[axisIndex].wait < data->axisRepeatDatas[axisIndex].waitCount)
-                data->axisRepeatDatas[axisIndex].waitCount = cWait + 1;
-            data->axisRepeatDatas[axisIndex].duration = cDuration;
-            data->axisRepeatDatas[axisIndex].wait = cWait;
-            data->axisRepeatDatas[axisIndex].interval = cInterval;
+                data->axisRepeatDatas[axisIndex].waitCount = wait + 1;
+            data->axisRepeatDatas[axisIndex].duration = duration;
+            data->axisRepeatDatas[axisIndex].wait = wait;
+            data->axisRepeatDatas[axisIndex].interval = interval;
         }
     }
     return self;
 }
 
 static void input_mouse_repeat_all(int argc, VALUE argv[], VALUE self) {
-    int cDuration, cWait, cInterval;
-    repeat_option_parse(argc, argv, self, NULL,&cDuration, &cWait, &cInterval, NULL);
+    int duration, wait, interval;
+    repeat_option_parse(argc, argv, self, NULL, &duration, &wait, &interval, NULL);
     int i;for (i = 0; i < 3; ++i) {
         if (inputData->mouse->btnRepeatDatas[i]->duration <= inputData->mouse->btnRepeatDatas[i]->durationCount)
-            inputData->mouse->btnRepeatDatas[i]->durationCount = cDuration; 
+            inputData->mouse->btnRepeatDatas[i]->durationCount = duration; 
         if (inputData->mouse->btnRepeatDatas[i]->wait < inputData->mouse->btnRepeatDatas[i]->waitCount)
-            inputData->mouse->btnRepeatDatas[i]->waitCount = cWait + 1;
-        inputData->mouse->btnRepeatDatas[i]->duration = cDuration;
-        inputData->mouse->btnRepeatDatas[i]->wait = cWait;
-        inputData->mouse->btnRepeatDatas[i]->interval = cInterval;
+            inputData->mouse->btnRepeatDatas[i]->waitCount = wait + 1;
+        inputData->mouse->btnRepeatDatas[i]->duration = duration;
+        inputData->mouse->btnRepeatDatas[i]->wait = wait;
+        inputData->mouse->btnRepeatDatas[i]->interval = interval;
     }
 }  
 
@@ -918,19 +929,19 @@ static VALUE input_mouse_repeat(int argc, VALUE argv[], VALUE self) {
     if (type == T_HASH || type == T_FIXNUM ) {
         input_mouse_repeat_all(argc, argv, self); return self;
     }
-    char *cTarget = NULL;
-    int cDuration, cWait, cInterval;
-    repeat_option_parse(argc, argv, self, &cTarget, &cDuration, &cWait, &cInterval, NULL);
-    int16_t num = mouseNameToNum(cTarget);
+    char *target = NULL;
+    int duration, wait, interval;
+    repeat_option_parse(argc, argv, self, &target, &duration, &wait, &interval, NULL);
+    int16_t num = mouseNameToNum(target);
     if (num != -1) {
         if (inputData->mouse->btnRepeatDatas[num]->duration <= inputData->mouse->btnRepeatDatas[num]->durationCount)
-            inputData->mouse->btnRepeatDatas[num]->durationCount = cDuration; 
+            inputData->mouse->btnRepeatDatas[num]->durationCount = duration; 
         if (inputData->mouse->btnRepeatDatas[num]->wait < inputData->mouse->btnRepeatDatas[num]->waitCount)
-            inputData->mouse->btnRepeatDatas[num]->waitCount = cWait + 1;
+            inputData->mouse->btnRepeatDatas[num]->waitCount = wait + 1;
 
-        inputData->mouse->btnRepeatDatas[num]->duration = cDuration;
-        inputData->mouse->btnRepeatDatas[num]->wait = cWait;
-        inputData->mouse->btnRepeatDatas[num]->interval = cInterval;
+        inputData->mouse->btnRepeatDatas[num]->duration = duration;
+        inputData->mouse->btnRepeatDatas[num]->wait = wait;
+        inputData->mouse->btnRepeatDatas[num]->interval = interval;
     }
     return self;
 }
@@ -1025,8 +1036,7 @@ void SetUpSDLGameController() {
         mJoyPadData[i]->buttonRepeatDatas = malloc(sizeof(RepeatData*) * mJoyPadData[i]->buttonNum);
         mJoyPadData[i]->buttons = malloc(sizeof(Uint8) * mJoyPadData[i]->buttonNum);
         
-        mJoyPadData[i]->x = 0;
-        mJoyPadData[i]->y = 0;
+        mJoyPadData[i]->x = mJoyPadData[i]->y = 0;
 
         int j; for (j = 0; j < 4; ++j) {
             mJoyPadData[i]->axis[j] = 0;
@@ -1046,10 +1056,10 @@ void SetUpSDLGameController() {
             mJoyPadData[i]->buttonRepeatDatas[k]->durationCount = 0;
             mJoyPadData[i]->buttonRepeatDatas[k]->waitCount = 0;
             mJoyPadData[i]->buttonRepeatDatas[k]->intervalCount = 0;
-
         }
     }
 }
+
 void Init_input(VALUE parent) {
     VALUE input_module = rb_define_module_under(parent, "Input");
     rb_define_module_function(input_module, "pad_num", input_pad_num, 0);  
@@ -1061,6 +1071,7 @@ void Init_input(VALUE parent) {
     rb_define_module_function(input_module, "key_up?", input_key_up, 1);
     rb_define_module_function(input_module, "key_down?", input_key_down, 1);
     rb_define_module_function(input_module, "key_push?", input_key_push, 1);
+//    rb_define_module_function(input_module, "keys?", input_keys, -1);
     rb_define_module_function(input_module, "push_keys", input_push_keys, 0);
     rb_define_module_function(input_module, "down_keys", input_down_keys, 0);
     rb_define_module_function(input_module, "up_keys", input_up_keys, 0);

@@ -1,7 +1,7 @@
 #include "sdl_udon_private.h"
 
-static st_table* winfontNameMap = NULL;
 static const char* WIN_FONTPATH = "C:/Windows/Fonts/";
+static st_table* winfontNameMap = NULL;
 static FontCache *fontCache = NULL;
 
 void FreeFontCache() {
@@ -21,7 +21,8 @@ static VALUE font_alloc(VALUE self) {
     fontData->name = NULL;
     return Data_Wrap_Struct(self, 0, -1, fontData);
 }
-static FontCache* createFontSetCache(const char*name, const int size, const int index) {
+
+static FontCache* createFontSetCache(const char *name, const int size, const int index) {
     FontCache *cache = malloc(sizeof(FontCache));
     cache->font = TTF_OpenFontIndex(name, size, index);
     if (cache->font == NULL) SDL_LOG_ABORT();
@@ -35,48 +36,46 @@ static FontCache* createFontSetCache(const char*name, const int size, const int 
 
 static VALUE font_initialize(int argc, VALUE argv[], VALUE self) {
     FontData *fontData; Data_Get_Struct(self, FontData, fontData);
-    volatile VALUE name, size, opt;
+    VALUE name;
+    volatile VALUE size, opt;
     rb_scan_args(argc, argv, "12", &name, &size, &opt);
     if (NIL_P(opt)) opt = rb_hash_new();
-    if (NIL_P(size)) size = rb_int_new(12);
-    int c_size = NUM2INT(size);
+    int cSize = NIL_P(size) ? 12 : NUM2INT(size); 
     volatile VALUE rIndex = rb_hash_lookup(opt, ID2SYM(rb_intern("index")));
-    int index = (NIL_P(rIndex)) ? -1 : NUM2INT(rIndex);
-    char*c_name = NULL;
+    int index = NIL_P(rIndex) ? -1 : NUM2INT(rIndex);
+    char *cName = NULL;
     VALUE flag = rb_funcall(name, rb_intern("=~"), 1, rb_reg_new("\\.tt[fc]$", strlen("\\.tt[fc]$"), 0));
     if (NIL_P(flag)) {
-        const char * nameKey = StringValuePtr(name);        
+        const char *nameKey = StringValuePtr(name);
         st_data_t data;
         st_lookup(winfontNameMap, (st_data_t)nameKey,&data);
-        P((const char*)data);
-        P("kokomade?");
         if (NIL_P(data)) { rb_raise(rb_eException, "fontname not found..."); }
         volatile VALUE strs = rb_str_split(rb_str_new2((const char*)data), "|");
         if (index == -1) index = NUM2INT(rb_str2inum(RARRAY_PTR(strs)[1], 10));
-        VALUE temp = rb_str_concat(rb_str_new2(WIN_FONTPATH), RARRAY_PTR(strs)[0]);
-        c_name = StringValuePtr(temp);
+        volatile VALUE temp = rb_str_concat(rb_str_new2(WIN_FONTPATH), RARRAY_PTR(strs)[0]);
+        cName = StringValuePtr(temp);
         size_t nameKeyLen = strlen(nameKey);
         fontData->name = malloc(nameKeyLen);
         strncpy(fontData->name, nameKey, nameKeyLen);
     } else {
         index = 0;
-        c_name = StringValuePtr(name);
+        cName = StringValuePtr(name);
     }
 
     if (fontCache == NULL) {
-        fontCache = createFontSetCache(c_name, c_size, index);
+        fontCache = createFontSetCache(cName, cSize, index);
         fontData->font = fontCache->font;
         rb_funcall(self, rb_intern("style="), 1, opt);
     } else {
         FontCache *buff = fontCache;
         while (TRUE) {
             size_t nameSize = strlen(buff->name);
-            if ((strncmp(buff->name, c_name,nameSize) == 0) && (buff->size == c_size) ) {
+            if ((strncmp(buff->name, cName,nameSize) == 0) && (buff->size == cSize) ) {
                 fontData->font = buff->font;
                 break;
             }
             if (buff->next == NULL) {
-                buff->next = createFontSetCache(c_name, c_size, index);
+                buff->next = createFontSetCache(cName, cSize, index);
                 fontData->font = buff->next->font;
                 rb_funcall(self, rb_intern("style="), 1, opt);
                 break;
@@ -91,30 +90,30 @@ static VALUE font_size(VALUE self) {
     FontData *fontData; Data_Get_Struct(self, FontData, fontData);
     return rb_int_new(TTF_FontHeight(fontData->font));
 }
+
 static VALUE font_get_style(VALUE self) {
     FontData *fontData; Data_Get_Struct(self, FontData, fontData);
-    int style_consts = TTF_GetFontStyle(fontData->font);
-    VALUE result = rb_hash_new();
-    rb_hash_aset(result, ID2SYM(rb_intern("bold")), (style_consts & TTF_STYLE_BOLD) ? Qtrue : Qfalse);
-    rb_hash_aset(result, ID2SYM(rb_intern("italic")), (style_consts & TTF_STYLE_ITALIC) ? Qtrue : Qfalse);
-    rb_hash_aset(result, ID2SYM(rb_intern("underline")), (style_consts & TTF_STYLE_UNDERLINE) ? Qtrue : Qfalse);
-    rb_hash_aset(result, ID2SYM(rb_intern("strikethrough")), (style_consts & TTF_STYLE_STRIKETHROUGH) ? Qtrue : Qfalse);
-
+    int style = TTF_GetFontStyle(fontData->font);
+    volatile VALUE result = rb_hash_new();
+    rb_hash_aset(result, ID2SYM(rb_intern("bold")), (style & TTF_STYLE_BOLD) ? Qtrue : Qfalse);
+    rb_hash_aset(result, ID2SYM(rb_intern("italic")), (style & TTF_STYLE_ITALIC) ? Qtrue : Qfalse);
+    rb_hash_aset(result, ID2SYM(rb_intern("underline")), (style & TTF_STYLE_UNDERLINE) ? Qtrue : Qfalse);
+    rb_hash_aset(result, ID2SYM(rb_intern("strikethrough")), (style & TTF_STYLE_STRIKETHROUGH) ? Qtrue : Qfalse);
     return result;
 }
 
 static VALUE font_set_style(VALUE self, VALUE hash) {
     FontData *fontData; Data_Get_Struct(self, FontData, fontData);
-    int style_consts = 0;
+    int style = 0;
     VALUE bool_bold = rb_hash_lookup(hash, ID2SYM(rb_intern("bold")));
-    if (bool_bold == Qtrue) style_consts = style_consts | 0x01;
+    if (bool_bold == Qtrue) style = style | 0x01;
     VALUE bool_italic = rb_hash_lookup(hash, ID2SYM(rb_intern("italic")));
-    if (bool_italic == Qtrue) style_consts = style_consts | 0x02; 
+    if (bool_italic == Qtrue) style = style | 0x02; 
     VALUE bool_underline = rb_hash_lookup(hash, ID2SYM(rb_intern("underline")));
-    if (bool_underline == Qtrue) style_consts = style_consts | 0x04; 
+    if (bool_underline == Qtrue) style = style | 0x04; 
     VALUE bool_strikethrough = rb_hash_lookup(hash, ID2SYM(rb_intern("strikethrough")));
-    if (bool_strikethrough == Qtrue) style_consts = style_consts | 0x08; 
-    TTF_SetFontStyle(fontData->font, style_consts);
+    if (bool_strikethrough == Qtrue) style = style | 0x08; 
+    TTF_SetFontStyle(fontData->font, style);
     return self;
 }
 
@@ -128,6 +127,7 @@ static VALUE font_set_outline(VALUE self, VALUE num) {
     TTF_SetFontOutline(fontData->font, NUM2INT(num));
     return self;
 }
+
 static VALUE font_get_hinting(VALUE self) {
     FontData *fontData; Data_Get_Struct(self, FontData, fontData);
     return rb_int_new(TTF_GetFontHinting(fontData->font));
@@ -136,7 +136,7 @@ static VALUE font_get_hinting(VALUE self) {
 static VALUE font_set_hinting(VALUE self, VALUE num_or_sym) {
     int result;
     if (rb_type(num_or_sym) == T_SYMBOL) {
-        VALUE str = rb_sym_to_s(num_or_sym);
+        volatile VALUE str = rb_sym_to_s(num_or_sym);
         const char* sym_str = StringValuePtr( str );
         size_t len = strlen(sym_str);
         if (strncmp(sym_str, "normal", len) == 0) {
@@ -211,7 +211,7 @@ static VALUE font_get_default_style(VALUE self) {
 }
 
 static VALUE font_clear_style(VALUE self) {
-    VALUE hash = rb_hash_new();
+    volatile VALUE hash = rb_hash_new();
     rb_hash_aset(hash, rb_funcall(self, rb_intern("default_style"), 0), Qtrue);
     rb_funcall(self, rb_intern("style="), 1, hash);
     return Qnil;
@@ -219,90 +219,72 @@ static VALUE font_clear_style(VALUE self) {
 
 static VALUE font_is_regular(VALUE self) {
     FontData* fontData; Data_Get_Struct(self, FontData, fontData);
-    int style_consts = TTF_GetFontStyle(fontData->font);
-    return (style_consts == 0 ? Qtrue : Qfalse);    
+    int style = TTF_GetFontStyle(fontData->font);
+    return (style == 0 ? Qtrue : Qfalse);    
 }
 
 static VALUE font_set_regular(VALUE self, VALUE boolean) {
     FontData* fontData; Data_Get_Struct(self, FontData, fontData);
-    int style_consts = TTF_GetFontStyle(fontData->font);
-    if (boolean == Qtrue) { style_consts = 0; }
-    TTF_SetFontStyle(fontData->font, style_consts);
+    int style = TTF_GetFontStyle(fontData->font);
+    if (boolean == Qtrue) { style = 0; }
+    TTF_SetFontStyle(fontData->font, style);
     return Qnil;
 }
 
 static VALUE font_is_bold(VALUE self) {
     FontData* fontData; Data_Get_Struct(self, FontData, fontData);
-    int style_consts = TTF_GetFontStyle(fontData->font);
-    return (style_consts == 0x01 ? Qtrue : Qfalse);    
+    int style = TTF_GetFontStyle(fontData->font);
+    return (style == 0x01 ? Qtrue : Qfalse);    
 }
 
 static VALUE font_set_bold(VALUE self, VALUE boolean) {
     FontData* fontData; Data_Get_Struct(self, FontData, fontData);
-    int style_consts = TTF_GetFontStyle(fontData->font);
-    if (boolean == Qtrue) {
-        style_consts = style_consts | 0x01;
-    } else {
-        style_consts = style_consts & ~0x01;
-    }
-    TTF_SetFontStyle(fontData->font, style_consts);
+    int style = TTF_GetFontStyle(fontData->font);
+    style = ( boolean == Qtrue ? (style | 0x01) : (style & ~0x01) );
+    TTF_SetFontStyle(fontData->font, style);
     return Qnil;
 }
 
 static VALUE font_is_italic(VALUE self) {
     FontData* fontData; Data_Get_Struct(self, FontData, fontData);
-    int style_consts = TTF_GetFontStyle(fontData->font);
-    return (style_consts == 0x02 ? Qtrue : Qfalse);    
+    int style = TTF_GetFontStyle(fontData->font);
+    return (style == 0x02 ? Qtrue : Qfalse);    
 }
 
 static VALUE font_set_italic(VALUE self, VALUE boolean) {
     FontData* fontData; Data_Get_Struct(self, FontData, fontData);
-    int style_consts = TTF_GetFontStyle(fontData->font);
-    if (boolean == Qtrue) {
-        style_consts = style_consts | 0x02;
-    } else {
-        style_consts = style_consts & ~0x02;
-    }
-    TTF_SetFontStyle(fontData->font, style_consts);
+    int style = TTF_GetFontStyle(fontData->font);
+    style = (boolean == Qtrue ? (style | 0x02) : (style & ~0x02) );
+    TTF_SetFontStyle(fontData->font, style);
     return Qnil;
 }
 
 static VALUE font_is_underline(VALUE self) {
     FontData* fontData; Data_Get_Struct(self, FontData, fontData);
-    int style_consts = TTF_GetFontStyle(fontData->font);
-    return (style_consts == 0x02 ? Qtrue : Qfalse);    
+    int style = TTF_GetFontStyle(fontData->font);
+    return (style == 0x02 ? Qtrue : Qfalse);    
 }
 
 static VALUE font_set_underline(VALUE self, VALUE boolean) {
     FontData* fontData; Data_Get_Struct(self, FontData, fontData);
-    int style_consts = TTF_GetFontStyle(fontData->font);
-    if (boolean == Qtrue) {
-        style_consts = style_consts | 0x04;
-    } else {
-        style_consts = style_consts & ~0x04;
-    }
-    TTF_SetFontStyle(fontData->font, style_consts);
+    int style = TTF_GetFontStyle(fontData->font);
+    style = ( boolean == Qtrue ? (style | 0x04) : (style & ~0x04) );
+    TTF_SetFontStyle(fontData->font, style);
     return Qnil;
 }
 
 static VALUE font_is_strikethrough(VALUE self) {
     FontData* fontData; Data_Get_Struct(self, FontData, fontData);
-    int style_consts = TTF_GetFontStyle(fontData->font);
-    return (style_consts == 0x08 ? Qtrue : Qfalse);    
+    int style = TTF_GetFontStyle(fontData->font);
+    return (style == 0x08 ? Qtrue : Qfalse);    
 }
 
 static VALUE font_set_strikethrough(VALUE self, VALUE boolean) {
     FontData* fontData; Data_Get_Struct(self, FontData, fontData);
-    int style_consts = TTF_GetFontStyle(fontData->font);
-    if (boolean == Qtrue) {
-        style_consts = style_consts | 0x08;
-    } else {
-        style_consts = style_consts & ~0x08;
-    }
-    TTF_SetFontStyle(fontData->font, style_consts);
+    int style = TTF_GetFontStyle(fontData->font);
+    style = (boolean == Qtrue ? style | 0x08 : style & ~0x08 );
+    TTF_SetFontStyle(fontData->font, style);
     return Qnil;
-
-
 }
 
 static VALUE font_get_text_width(VALUE self, VALUE text) {
@@ -311,16 +293,12 @@ static VALUE font_get_text_width(VALUE self, VALUE text) {
     TTF_SizeUTF8(fontData->font, StringValuePtr(text), &w, &h);
     return rb_int_new(w);
 }
-static VALUE font_class_is_exist(VALUE self, VALUE name) {
-    return Qnil;
-}
 
-void Quit_font() {
-    st_free_table(winfontNameMap);
-}
+void Quit_font() { st_free_table(winfontNameMap); }
+
 void Init_font(VALUE parent) {
     VALUE font_class = rb_define_class_under(parent, "Font", rb_cObject);
-    rb_define_singleton_method(font_class, "exist?", font_class_is_exist, 1);
+//    rb_define_singleton_method(font_class, "exist?", font_class_is_exist, 1);
     rb_define_alloc_func(font_class, font_alloc);
     rb_define_private_method(font_class, "initialize", font_initialize, -1);
     rb_define_method(font_class, "size", font_size, 0);
@@ -351,6 +329,7 @@ void Init_font(VALUE parent) {
     rb_define_method(font_class, "strikethrougu?", font_is_strikethrough, 0);
     rb_define_method(font_class, "strikethrougu=", font_set_strikethrough, 1);
     rb_define_method(font_class, "text_width", font_get_text_width, 1);
+
     winfontNameMap = st_init_strtable_with_size(106);
     st_add_direct(winfontNameMap,(st_data_t)"CRバジョカ隅書体",(st_data_t)"CRBajoka-G.ttf|0");
     st_add_direct(winfontNameMap,(st_data_t)"CRバジョカ廉書体",(st_data_t)"CRBajoka-R.ttf|0");

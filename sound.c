@@ -8,8 +8,8 @@ void FreeSoundCache() {
     Mix_HaltChannel(-1);
     SoundEffectCache *effectNode = mEffectCache;
     while (effectNode != NULL) {
-            Mix_FreeChunk(effectNode->chunk);
-            effectNode = effectNode->next;
+        Mix_FreeChunk(effectNode->chunk);
+        effectNode = effectNode->next;
     }
     SoundMusicCache *musicNode = mMusicCache;
     while (musicNode != NULL) {
@@ -109,7 +109,6 @@ Mix_Chunk* CreateSEAtCache(const char* fileName) {
         prev_cache = cache;
         cache = cache->next;
     }
-
     if (chunk == NULL) {
         cache = mEffectCache;
         SoundEffectCache *regist_cache;
@@ -178,10 +177,7 @@ Mix_Chunk* CreateSEFromMEMAtCache(const char* name, const Uint8* mem) {
 }
 
 
-void SetUpSound() {
-    Mix_AllocateChannels(16);
-
-}
+void SetUpSound() { Mix_AllocateChannels(16); }
 
 static VALUE music_alloc(VALUE self) {
     MusicData*music = ALLOC(MusicData);
@@ -212,6 +208,7 @@ static VALUE music_get_volume(VALUE self) {
     MusicData* musicData; Data_Get_Struct(self, MusicData, musicData);
     return rb_float_new(musicData->volume);
 }
+
 static VALUE music_set_volume(VALUE self, VALUE volume) {
     MusicData* musicData; Data_Get_Struct(self, MusicData, musicData);
     musicData->volume =NUM2DBL(volume);
@@ -219,6 +216,7 @@ static VALUE music_set_volume(VALUE self, VALUE volume) {
     Mix_VolumeMusic(cVolume);
     return Qnil;
 }
+
 static VALUE music_play(int argc, VALUE argv[], VALUE self) {
     int cVolume, cFade, cLoop, cPosition;
     volatile VALUE option_or_volume, fade, position, loop;
@@ -289,6 +287,7 @@ static VALUE effect_initialize(VALUE self, VALUE file_name) {
     effectData->chunk = CreateSEAtCache(StringValuePtr(file_name));
     return Qnil;
 }
+
 static VALUE effect_class_load(VALUE klass, VALUE filename) {
    volatile VALUE effect_instance = Qundef;
     VALUE ext_name = rb_funcall(rb_cFile, rb_intern("extname"), 1, rb_funcall(filename, rb_intern("to_s"), 0));
@@ -300,7 +299,7 @@ static VALUE effect_class_load(VALUE klass, VALUE filename) {
         effect_instance = rb_class_new_instance(1, &filename, klass);
     }
     return effect_instance;
-} 
+}
 
 static VALUE effect_play(int argc, VALUE argv[], VALUE self) {
     EffectData* effectData; Data_Get_Struct(self, EffectData, effectData);
@@ -330,6 +329,7 @@ static VALUE effect_get_volume(VALUE self) {
     EffectData* effectData; Data_Get_Struct(self, EffectData, effectData);
     return rb_float_new(effectData->volume);
 }
+
 static VALUE effect_set_volume(VALUE self, VALUE volume) {
     EffectData* effectData; Data_Get_Struct(self, EffectData, effectData);
     effectData->volume = NUM2DBL(volume);
@@ -337,7 +337,6 @@ static VALUE effect_set_volume(VALUE self, VALUE volume) {
     Mix_VolumeChunk(effectData->chunk, cVolume);
     return Qnil;
 }
-
 
 BOOL IsUnattachedChunk(EffectData* data) {
     return ( data->channel == -1 || Mix_GetChunk(data->channel) != data->chunk);
@@ -360,6 +359,7 @@ static VALUE effect_is_fading(VALUE self) {
     if ( IsUnattachedChunk(effectData)) return Qnil;
     return (Mix_FadingChannel(effectData->channel) != MIX_NO_FADING) ? Qtrue : Qfalse;
 }
+
 static VALUE sound_module_effect_size() {
     int size = 0;
     int i;for(i = 0; i < 16; ++i) {
@@ -453,10 +453,8 @@ static VALUE sound_module_play_se(int argc, VALUE argv[], VALUE module) {
     } else {
         return Mix_PlayChannel(-1, CreateSEAtCache(StringValuePtr(file_name)), 0) ? module : Qnil;
     }
-    
     return Qnil;
 }
-
 
 static VALUE sound_module_load_bgm(VALUE module, VALUE file_name) {
      VALUE instance = rb_funcall(rb_path2class("SDLUdon::Sound::Music"), rb_intern("load"), 1, file_name);
@@ -485,7 +483,6 @@ static VALUE sound_module_stop_se(VALUE module) {
     Mix_HaltChannel(-1);
     return Qnil;
 }
-
 
 static VALUE sound_module_pause(VALUE module) {
     Mix_PauseMusic(); Mix_Pause(-1);
@@ -533,19 +530,6 @@ static VALUE sound_module_se_is_playing(VALUE self) {
 static VALUE sound_module_bgm_is_playing(VALUE self) {
     return (Mix_PlayingMusic() == 1) ? Qtrue : Qfalse;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

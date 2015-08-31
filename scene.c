@@ -2,7 +2,6 @@
 
 static volatile VALUE sym_enterframe = Qundef;
 
-
 static VALUE scene_initialize(int argc, VALUE argv[], VALUE self) {
     rb_call_super(argc, argv);
     rb_ivar_set(self, rb_intern("@child_lock"), Qfalse);
@@ -17,13 +16,9 @@ static VALUE scene_initialize(int argc, VALUE argv[], VALUE self) {
     } else {
         rb_ivar_set(self, rb_intern("@screen"), screen);
     }
-    rb_ivar_set(self, rb_intern("@pool"), rb_ary_new()); 
+    rb_ivar_set(self, rb_intern("@pool"), rb_ary_new()); // @_child_pool_くらいにしておかないと危ない
     return Qnil;
 }
-
-
-
-
 
 static VALUE scene_draw(int argc, VALUE argv[], VALUE self) {
     VALUE render_target;
@@ -43,7 +38,7 @@ static VALUE scene_draw(int argc, VALUE argv[], VALUE self) {
         if (NIL_P(visible) || (visible == Qtrue))
             rb_funcall(render_target, id_draw_ex, 4, image, x,y,opts);
     }
-    int i; for ( i = 0; i < size; ++i) {
+    for ( int i = 0; i < size; ++i) {
         child = arys[i];
         if (rb_respond_to(child, id_draw)) {
             rb_funcall(child, id_draw, 1, render_target);
@@ -126,7 +121,6 @@ VALUE scene_add_child(int argc, VALUE argv[], VALUE self) {
     return self;
 }
 
-
 static VALUE scene_find_child(int argc, VALUE argv[], VALUE self) {
     if (rb_ivar_get(self, rb_intern("@child_lock"))) return Qnil;
     VALUE ary = rb_ivar_get(self, id_iv_pool);
@@ -137,9 +131,7 @@ static VALUE scene_find_children(int argc, VALUE argv[], VALUE self) {
     if (rb_ivar_get(self, rb_intern("@child_lock"))) return Qnil;
     VALUE ary = rb_ivar_get(self, id_iv_pool);
     return rb_funcall_with_block(ary, rb_intern("find_all"), argc, argv, rb_block_proc());
-
 }
-
 
 static VALUE scene_delete_child(int argc, VALUE argv[], VALUE self) {
     if (rb_ivar_get(self, rb_intern("@child_lock"))) return Qnil;
@@ -171,7 +163,6 @@ static VALUE scene_get_child(VALUE self, VALUE index) {
     VALUE ary = rb_ivar_get(self, id_iv_pool);
     return rb_ary_entry(ary, NUM2INT(index));    
 }
-
 
 static VALUE scene_hit(int argc, VALUE argv[], VALUE self) {
     VALUE target, event_able;
@@ -223,9 +214,7 @@ static VALUE hit_response_block(VALUE data, VALUE self, int argc, VALUE argv[]) 
     if (!NIL_P( a_event )) { rb_funcall(a_event, rb_intern("trigger"), 2, ID2SYM(rb_intern("hit")), RARRAY_PTR(hit_result)[0]); }
     VALUE b_event = rb_ivar_get(RARRAY_PTR(pair)[1], rb_intern("@event_manager"));
     if (!NIL_P( b_event )) { rb_funcall(b_event, rb_intern("trigger"), 2, ID2SYM(rb_intern("hit")), RARRAY_PTR(hit_result)[1]); }
-    if (rb_block_given_p()) {
-        rb_yield(hit_result);
-    } 
+    if (rb_block_given_p()) { rb_yield(hit_result); }
     return Qnil;
 }
 
@@ -235,10 +224,9 @@ static VALUE scene_each_child_hit_block(VALUE child, VALUE self, int argc, VALUE
 }
 
 static VALUE scene_each_hit(VALUE self) {
-    return Qnil;
     if (rb_obj_is_kind_of(self, rb_path2class("SDLUdon::Collision")) == Qtrue) {
         VALUE pool = rb_ivar_get(self, rb_intern("@pool"));
-        int i, j,len = RARRAY_LENINT(pool);
+        int i, j, len = RARRAY_LENINT(pool);
         volatile VALUE hit_info_ary = rb_hash_new();
         VALUE collision_module = rb_path2class("SDLUdon::Collision"); 
         for (i = 0; i < len; ++i) {
@@ -270,9 +258,6 @@ static VALUE scene_to_a(VALUE self) {
     return result_ary;
 }
 
-
-
-
 static VALUE scene_swap_child(VALUE self, VALUE dst_scene) {
     volatile VALUE self_child = rb_ivar_get(self, id_iv_pool);
     volatile VALUE dst_child = rb_ivar_get(dst_scene, id_iv_pool);
@@ -296,7 +281,6 @@ static VALUE scene_temp_child(int argc, VALUE argv[], VALUE self) {
     rb_need_block();    
     volatile VALUE childs; rb_scan_args(argc, argv, "*", &childs);
     rb_funcall(self, rb_intern("add_child"), 1, childs);
-
     rb_yield(Qnil);
     rb_funcall(self, rb_intern("delete_child"), 1, childs);
     return self;
@@ -327,9 +311,7 @@ static VALUE scene_show(VALUE self) {
 
 }
 
-static VALUE scene_is_visible(VALUE self) {
-  return rb_call_super(0, NULL);
-}
+static VALUE scene_is_visible(VALUE self) { return rb_call_super(0, NULL); }
 
 static VALUE scene_each_move( VALUE item, VALUE point, int argc, VALUE argv[]) {
     VALUE diff_x = RARRAY_PTR(point)[0];
@@ -369,10 +351,7 @@ static VALUE scene_move_add(int argc, VALUE argv[], VALUE self) {
     return self;
 }
 
-
-static VALUE scene_each_event_trigger(int argc, VALUE argv[], VALUE self) {
-    return Qnil;
-}
+static VALUE scene_each_event_trigger(int argc, VALUE argv[], VALUE self) { return Qnil; }
 
 static VALUE scene_each_pause( VALUE child, VALUE none, int argc, VALUE argv[]) {
     rb_funcall(child, rb_intern("pause"), 0);
@@ -405,7 +384,7 @@ void Init_scene(VALUE parent_module) {
     rb_define_private_method(scene_class, "initialize", scene_initialize, -1);
     rb_define_method(scene_class, "size", scene_size, 0);
     rb_define_method(scene_class, "add_child", scene_add_child, -1);
-    rb_define_method(scene_class, "<<", scene_add_child, -1); 
+    rb_define_method(scene_class, "<<", scene_add_child, -1); //_syntax_sugar, 1);
     rb_define_method(scene_class, "[]", scene_get_child, 1);
     rb_define_method(scene_class, "child_at", scene_get_child, 1);
     rb_define_method(scene_class, "draw", scene_draw, -1);
